@@ -1,5 +1,7 @@
 # ⌘ Writter
 
+![Preview](./public/writter-desktop-alpha.png)
+
 An editor for technical writting, blogging and note taking using markdown.
 
 > Version: v0.0.1 Alpha
@@ -20,6 +22,7 @@ well why not, most editors around are focused on non technical people, they have
 - File Size
 - Builtin markdown guide
 - Web Version
+- Keyboard shortcuts
 
 ## Development
 
