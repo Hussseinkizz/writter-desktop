@@ -4,6 +4,7 @@ import {
   HiFolder,
   HiMenuAlt3,
   HiMenuAlt4,
+  HiMoon,
   HiRefresh,
   HiSearch,
   HiSearchCircle,
@@ -29,6 +30,7 @@ export const AppHeader = () => {
       {/* The Buttons */}
       <div className="flex items-center justify-end gap-2">
         <HiSearchCircle className="foo" />
+        <HiMoon className="foo" />
         <HiBell className="foo" />
         <HiMenuAlt3 className="foo" />
       </div>

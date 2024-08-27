@@ -1,4 +1,4 @@
-import Markdown from "react-markdown";
+import MilkdownEditor from "./milkdown-crepe";
 
 interface Props {
   markdownContent: string;
@@ -6,10 +6,10 @@ interface Props {
 
 export const PreviewComponent = (props: Props) => {
   return (
-    <div className="flex h-full min-h-full w-[30%] flex-auto">
-      <Markdown className="--py-4 flex w-full flex-col gap-2 bg-zinc-900 px-4 text-white">
-        {props.markdownContent}
-      </Markdown>
-    </div>
+    <section className="flex h-full min-h-full w-[30%] flex-auto">
+      <div className="--py-4 flex w-full flex-col gap-2 bg-zinc-900 px-4 text-white">
+        <MilkdownEditor />
+      </div>
+    </section>
   );
 };

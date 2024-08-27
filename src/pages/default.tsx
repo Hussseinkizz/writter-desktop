@@ -3,6 +3,7 @@ import { AppHeader } from "@/components/app-header";
 import { EditorComponent } from "@/components/editor";
 import { PreviewComponent } from "@/components/preview";
 import { SideBarComponent } from "@/components/sidebar";
+import { ViewLayout } from "@/components/view-layout";
 import { useState } from "react";
 
 export default function Default() {
@@ -13,12 +14,16 @@ export default function Default() {
       {/* The Header */}
       <AppHeader />
       <main className="flex h-[90vh] w-full flex-auto items-center justify-center overflow-hidden bg-zinc-900 text-white">
-        <SideBarComponent />
-        <EditorComponent
-          content={markdown}
-          onContentChange={(data) => setMarkdown(data)}
+        <ViewLayout
+          leftSideBarElement={<SideBarComponent />}
+          middleElement={
+            <EditorComponent
+              content={markdown}
+              onContentChange={(data) => setMarkdown(data)}
+            />
+          }
+          rightSidebarElement={<PreviewComponent markdownContent={markdown} />}
         />
-        <PreviewComponent markdownContent={markdown} />
       </main>
       <AppFooter />
     </section>
