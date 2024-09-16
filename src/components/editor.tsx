@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import Editor from "@monaco-editor/react";
 
 interface Props {
@@ -5,21 +6,39 @@ interface Props {
   onContentChange: (newValue: string) => void;
 }
 
+let editorInstance: any = null;
+
+export function getContent() {
+  return editorInstance?.getValue() || "";
+}
+
+export function setContent(newContent: string) {
+  if (editorInstance) {
+    editorInstance.setValue(newContent);
+  }
+}
+
 export function EditorComponent(props: Readonly<Props>) {
+  const editorRef = useRef(null);
+
   const handleEditorChange = (value: any) => {
     props.onContentChange(value);
   };
 
+  // Set editor instance on mount
+  const handleEditorDidMount = (editor: any) => {
+    editorInstance = editor;
+  };
+
   const options = {
-    theme: "vs-dark", // Enables dark mode
-    automaticLayout: true, // Automatically adjusts the layout to fit the container
-    // wordWrap: "on", // Wraps lines that exceed the column limit
-    wordWrapColumn: 80, // Sets the column limit
+    theme: "vs-dark",
+    automaticLayout: true,
+    wordWrapColumn: 80,
     minimap: {
-      enabled: false, // Disables the minimap
+      enabled: false,
     },
     scrollbar: {
-      alwaysConsumeMouseWheel: false, // Allows scrolling outside the editor when the mouse wheel is pressed
+      alwaysConsumeMouseWheel: false,
     },
   };
 
@@ -29,8 +48,9 @@ export function EditorComponent(props: Readonly<Props>) {
         theme="vs-dark"
         options={options}
         defaultLanguage="markdown"
-        defaultValue={props.content}
+        value={props.content}
         onChange={handleEditorChange}
+        onMount={handleEditorDidMount}
       />
     </div>
   );

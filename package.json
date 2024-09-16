@@ -75,6 +75,7 @@
     "dotenv": "^16.3.1",
     "embla-carousel-react": "8.0.0-rc17",
     "framer-motion": "^10.16.4",
+    "hotkeys-js": "^3.13.7",
     "nanoid": "^5.0.1",
     "next-themes": "^0.2.1",
     "open-props": "^1.5.16",
