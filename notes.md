@@ -27,3 +27,4 @@
 - <https://platejs.org/docs/components/installation/vite>
 - <https://platejs.org/>
 - <https://github.com/udecode/plate>
+- <https://github.com/Automattic/harper>
