@@ -3,8 +3,8 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import RoutesConfig from "./routes.js";
 // import ReactQueryProvider from "./utils/react-query-provider.js";
-import "@/styles/globals.css";
-import "@/styles/custom.module.css";
+import "../styles/globals.css";
+import "../styles/custom.module.css";
 import { storeConfig } from "./react-hands-v2.jsx";
 import AppLayout from "./components/app-layout.js";
 

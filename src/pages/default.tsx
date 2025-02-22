@@ -1,19 +1,25 @@
 import { AppFooter } from "@/components/app-footer";
 import { AppHeader } from "@/components/app-header";
-import { EditorComponent, getContent, setContent } from "@/components/editor";
-import { PreviewComponent } from "@/components/preview";
 import { SideBarComponent } from "@/components/sidebar";
 import { ViewLayout } from "@/components/view-layout";
 import { useEffect, useState } from "react";
 import hotkeys from "hotkeys-js";
+import { initialMarkdown } from "@/data/sample";
+import MarkdownEditor from "@/components/markdown-editor";
+import MarkdownPreview from "@/components/markdown-preview";
+import { useEditor, useResetEditorOnChange } from "@/hooks/useEditor";
+import type { Value } from "@udecode/plate";
 
 export default function Default() {
-  const [markdown, setMarkdown] = useState("# Type your markdown here");
+  const [value, setValue] = useState<Value>([]);
+  const editor = useEditor(initialMarkdown);
+
+  useResetEditorOnChange({ editor, value: value }, [value]);
 
   const saveContent = () => {
     console.log("saving...");
-    let content = getContent();
-    console.log("content::", content);
+    // let content = getContent();
+    // console.log("content::", content);
     // setContent("# something new!");
   };
 
@@ -56,17 +62,15 @@ export default function Default() {
         <ViewLayout
           leftSideBarElement={<SideBarComponent />}
           middleElement={
-            <EditorComponent
-              content={markdown}
-              onContentChange={(data) => setMarkdown(data)}
+            <MarkdownEditor
+              initialMarkdown={editor.api.markdown.serialize(value)}
+              onChange={(markdown: string) =>
+                setValue(editor.api.markdown.deserialize(markdown))
+              }
+              editor={editor}
             />
           }
-          rightSidebarElement={
-            <PreviewComponent
-              markdownContent={markdown}
-              onMarkdownContentChange={(data) => setMarkdown(data)}
-            />
-          }
+          rightSidebarElement={<MarkdownPreview editor={editor} />}
         />
       </main>
       <AppFooter />

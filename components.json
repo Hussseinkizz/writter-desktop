@@ -12,5 +12,18 @@
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils"
+  },
+  "iconLibrary": "radix",
+  "registries": {
+    "plate": {
+      "style": "default",
+      "tailwind": {
+        "baseColor": "slate"
+      },
+      "aliases": {
+        "ui": "@/components/plate-ui"
+      },
+      "url": "https://platejs.org/r"
+    }
   }
 }
