@@ -13,6 +13,7 @@
 - stuff looking good, but need to fix type error in defualt page, and add a loading state for the editor and change the setup to use the new tuari + vite recommended setup in thier docs.
 - also need to make sure editing works and state syncs across the panes, the editor and the markdown preview
 - these features also: Meet my side project: editing time count, word count, ai auto completions, grammar checking, auto save, desktop support with offline support and soon cloud syncing... 😊
+- add emoji selection widget and some table generator to ease table creation simillar to how google docs creates tables.
 
 ## Links
 
