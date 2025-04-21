@@ -16,3 +16,11 @@
 - <https://milkdown.dev/playground>
 - <https://milkdown.dev/docs/guide/using-crepe>
 - <https://tauri.app/v1/guides/getting-started/setup/vite/>
+
+- <https://uiwjs.github.io/react-md-editor/>
+- <https://github.com/uiwjs/react-markdown-editor>
+- <https://uiwjs.github.io/react-markdown-preview/>
+- <https://uiwjs.github.io/react-codemirror/>
+- <https://blog.replit.com/code-editors>
+- <https://blog.replit.com/code-editors>
+- <https://github.com/codemirror/codemirror5/blob/master/mode/gfm/gfm.js>

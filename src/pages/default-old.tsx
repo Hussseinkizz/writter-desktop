@@ -1,15 +1,12 @@
 import { AppFooter } from "@/components/app-footer";
 import { AppHeader } from "@/components/app-header";
 // import { EditorComponent, getContent, setContent } from "@/components/editor";
-// import { PreviewComponent } from "@/components/preview";
+import { PreviewComponent } from "@/components/preview";
 import { SideBarComponent } from "@/components/sidebar";
 import { ViewLayout } from "@/components/view-layout";
 import { useEffect, useState } from "react";
 import hotkeys from "hotkeys-js";
-import MarkDownEditor from "@/components/markdown-editor";
 import CodeMirroEditor from "@/components/editor-code-mirror";
-import Editor from "@/components/new-editor";
-// import CodeMirroEditor from "@/components/editor-code-mirror";
 
 export default function Default() {
   const [markdown, setMarkdown] = useState("# Type your markdown here");
@@ -57,9 +54,23 @@ export default function Default() {
       {/* The Header */}
       <AppHeader />
       <main className="flex h-[90vh] w-full flex-auto items-center justify-center overflow-hidden bg-zinc-900 text-white">
+        {/* <ViewLayout
+          leftSideBarElement={<SideBarComponent />}
+          middleElement={
+            <EditorComponent
+              content={markdown}
+              onContentChange={(data) => setMarkdown(data)}
+            />
+          } */}
         <ViewLayout
           leftSideBarElement={<SideBarComponent />}
-          editorArea={<Editor />}
+          middleElement={<CodeMirroEditor />}
+          rightSidebarElement={
+            <PreviewComponent
+              markdownContent={markdown}
+              onMarkdownContentChange={(data) => setMarkdown(data)}
+            />
+          }
         />
       </main>
       <AppFooter />

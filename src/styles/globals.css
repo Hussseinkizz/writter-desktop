@@ -603,3 +603,9 @@ html {
     display: none;
   }
 }
+
+/* textarea:focus,
+select:focus {
+  border: none;
+  box-shadow: none;
+} */
