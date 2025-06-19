@@ -1,12 +1,9 @@
 import { useCodeMirror, basicSetup, EditorView } from "@uiw/react-codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
-import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
+import { githubDark } from "@uiw/codemirror-theme-github";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
-import { useCallback, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import "github-markdown-css";
 
 const markdownHighlightStyle = HighlightStyle.define([
@@ -19,14 +16,43 @@ const myTheme = EditorView.theme({
   "&": {
     backgroundColor: "transparent !important",
   },
+  ".cm-gutters": {
+    display: "none !important",
+  },
+  ".cm-content": {
+    fontSize: "1.2em",
+    padding: "1em",
+  },
+  ".cm-line": {
+    marginTop: "0.5em",
+  },
+  // Custom dark, thin scrollbar for CodeMirror
+  ".cm-scroller": {
+    scrollbarWidth: "thin",
+    scrollbarColor: "#222 #111", // thumb, track
+  },
+  // Webkit Scrollbar (Chrome, Edge, Safari)
+  ".cm-scroller::-webkit-scrollbar": {
+    width: "8px",
+    background: "#111",
+  },
+  ".cm-scroller::-webkit-scrollbar-thumb": {
+    background: "#222",
+    borderRadius: "4px",
+  },
+  ".cm-scroller::-webkit-scrollbar-corner": {
+    background: "#111",
+  },
 });
 
-const Editor = () => {
-  const [value, setValue] = useState<string>("# Welcome to Writter!");
-  const handleChange = useCallback((val: string) => setValue(val), []);
+type EditorProps = {
+  value: string;
+  onChange: (value: string) => void;
+};
 
+export const Editor = (props: EditorProps) => {
   const { setContainer } = useCodeMirror({
-    value, // Uses the state we set earlier to store the Markdown content
+    value: props.value,
     height: "90vh", // Sets a fixed height for the editor
     extensions: [
       basicSetup({
@@ -38,26 +64,13 @@ const Editor = () => {
         addKeymap: true, // Enables useful keyboard shortcuts
       }),
       syntaxHighlighting(markdownHighlightStyle), // Applies our custom Markdown styling
-      EditorView.lineWrapping, // Enables line wrapping
+      // EditorView.lineWrapping, // Enables line wrapping
       myTheme, // Uses our transparent background theme
     ],
     // theme: resolvedTheme === "dark" ? githubDark : githubLight, // Adjusts the theme dynamically
     theme: githubDark, // Adjusts the theme dynamically
-    onChange: handleChange, // Updates the state when the user types
+    onChange: props.onChange,
   });
 
-  return (
-    <div className="w-screen py-2 sm:grid sm:grid-cols-2">
-      <div>
-        <div ref={setContainer} className="border-r-1" />
-      </div>
-      <div>
-        <div className="markdown-body markdown-preview scrollbar hidden h-[90vh] overflow-y-auto !bg-background p-2 sm:block">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
-        </div>
-      </div>
-    </div>
-  );
+  return <div ref={setContainer} className="border-r-1 w-full" />;
 };
-
-export default Editor;

@@ -3,16 +3,19 @@ import { AppHeader } from "@/components/app-header";
 // import { EditorComponent, getContent, setContent } from "@/components/editor";
 // import { PreviewComponent } from "@/components/preview";
 import { SideBarComponent } from "@/components/sidebar";
-import { ViewLayout } from "@/components/view-layout";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import hotkeys from "hotkeys-js";
-import MarkDownEditor from "@/components/markdown-editor";
-import CodeMirroEditor from "@/components/editor-code-mirror";
-import Editor from "@/components/new-editor";
-// import CodeMirroEditor from "@/components/editor-code-mirror";
+import { ViewLayout } from "@/components/view-layout";
+import { Editor } from "@/components/new-editor";
+import { Preview } from "@/components/new-preview";
 
 export default function Default() {
-  const [markdown, setMarkdown] = useState("# Type your markdown here");
+  const [markdown, setMarkdown] = useState("# New Note!");
+
+  const handleChange = useCallback((val: string) => {
+    setMarkdown(val);
+    // console.log(val);
+  }, []);
 
   const saveContent = () => {
     console.log("saving...");
@@ -59,7 +62,8 @@ export default function Default() {
       <main className="flex h-[90vh] w-full flex-auto items-center justify-center overflow-hidden bg-zinc-900 text-white">
         <ViewLayout
           leftSideBarElement={<SideBarComponent />}
-          editorArea={<Editor />}
+          middleElement={<Editor value={markdown} onChange={handleChange} />}
+          rightSidebarElement={<Preview markdown={markdown} />}
         />
       </main>
       <AppFooter />

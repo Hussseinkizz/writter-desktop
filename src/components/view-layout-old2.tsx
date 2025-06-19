@@ -6,8 +6,7 @@ import {
 
 interface Props {
   leftSideBarElement: React.ReactNode;
-  middleElement: React.ReactNode;
-  rightSidebarElement: React.ReactNode;
+  editorArea: React.ReactNode;
 }
 
 export const ViewLayout = (props: Props) => {
@@ -23,13 +22,7 @@ export const ViewLayout = (props: Props) => {
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={40}>
             <div className="flex h-full w-full items-center justify-center">
-              {props.middleElement}
-            </div>
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={40}>
-            <div className="flex h-full w-full items-center justify-center">
-              {props.rightSidebarElement}
+              {props.editorArea}
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
