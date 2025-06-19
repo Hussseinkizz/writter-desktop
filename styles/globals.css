@@ -661,6 +661,7 @@ html {
   }
 }
 
+<<<<<<< HEAD:styles/globals.css
 @layer base {
   [data-registry="plate"] * {
     @apply border-border outline-ring/50;
@@ -680,3 +681,10 @@ html {
     @apply bg-background text-foreground;
   }
 }
+=======
+/* textarea:focus,
+select:focus {
+  border: none;
+  box-shadow: none;
+} */
+>>>>>>> main-new:src/styles/globals.css

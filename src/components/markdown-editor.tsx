@@ -1,48 +1,22 @@
-"use client";
+import MDEditor from "@uiw/react-md-editor";
+import { useState } from "react";
+import rehypeSanitize from "rehype-sanitize";
 
-import { MarkdownPlugin } from "@udecode/plate-markdown";
-import { Plate, usePlateEditor } from "@udecode/plate/react";
-
-import { Editor, EditorContainer } from "@/components/plate-ui/editor";
-
-const markdownPlugin = MarkdownPlugin.configure({
-  options: { indentList: true },
-});
-
-export interface MarkdownEditorProps {
-  /** A markdown string passed from the parent */
-  initialMarkdown: string;
-  /** Callback to update the markdown in the parent */
-  onChange: (markdown: string) => void;
-  editor: any;
-}
-
-const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
-  initialMarkdown,
-  editor,
-  onChange,
-}) => {
-  const markdownEditor = usePlateEditor({
-    plugins: [markdownPlugin],
-    value: [{ children: [{ text: initialMarkdown }], type: "p" }],
-  });
-
+export default function MarkDownEditor() {
+  const [value, setValue] = useState(`Hello There...`);
   return (
-    <Plate
-      onValueChange={() => {
-        onChange(
-          editor.api.markdown.deserialize(
-            markdownEditor.api.markdown.serialize(),
-          ),
-        );
-      }}
-      editor={markdownEditor}
-    >
-      <EditorContainer>
-        <Editor variant="none" className="p-2 font-mono text-sm" />
-      </EditorContainer>
-    </Plate>
+    <div className="flex h-full w-full flex-col">
+      <MDEditor
+        className="flex h-full w-full min-w-full"
+        value={value}
+        height="90vh"
+        placeholder="what's on your mind today?"
+        visibleDragbar={false}
+        onChange={(value) => setValue(value || "")}
+        previewOptions={{
+          rehypePlugins: [[rehypeSanitize]],
+        }}
+      />
+    </div>
   );
-};
-
-export default MarkdownEditor;
+}

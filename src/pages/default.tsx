@@ -1,20 +1,21 @@
 import { AppFooter } from "@/components/app-footer";
 import { AppHeader } from "@/components/app-header";
+// import { EditorComponent, getContent, setContent } from "@/components/editor";
+// import { PreviewComponent } from "@/components/preview";
 import { SideBarComponent } from "@/components/sidebar";
-import { ViewLayout } from "@/components/view-layout";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import hotkeys from "hotkeys-js";
-import { initialMarkdown } from "@/data/sample";
-import MarkdownEditor from "@/components/markdown-editor";
-import MarkdownPreview from "@/components/markdown-preview";
-import { useEditor, useResetEditorOnChange } from "@/hooks/useEditor";
-import type { Value } from "@udecode/plate";
+import { ViewLayout } from "@/components/view-layout";
+import { Editor } from "@/components/new-editor";
+import { Preview } from "@/components/new-preview";
 
 export default function Default() {
-  const [value, setValue] = useState<Value>([]);
-  const editor = useEditor(initialMarkdown);
+  const [markdown, setMarkdown] = useState("# New Note!");
 
-  useResetEditorOnChange({ editor, value: value }, [value]);
+  const handleChange = useCallback((val: string) => {
+    setMarkdown(val);
+    // console.log(val);
+  }, []);
 
   const saveContent = () => {
     console.log("saving...");
@@ -61,16 +62,8 @@ export default function Default() {
       <main className="flex h-[90vh] w-full flex-auto items-center justify-center overflow-hidden bg-zinc-900 text-white">
         <ViewLayout
           leftSideBarElement={<SideBarComponent />}
-          middleElement={
-            <MarkdownEditor
-              initialMarkdown={editor.api.markdown.serialize(value)}
-              onChange={(markdown: string) =>
-                setValue(editor.api.markdown.deserialize(markdown))
-              }
-              editor={editor}
-            />
-          }
-          rightSidebarElement={<MarkdownPreview editor={editor} />}
+          middleElement={<Editor value={markdown} onChange={handleChange} />}
+          rightSidebarElement={<Preview markdown={markdown} />}
         />
       </main>
       <AppFooter />
