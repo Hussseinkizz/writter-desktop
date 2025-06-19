@@ -7,6 +7,7 @@
 3. git sync
 4. sharing
 5. team support
+6. Set pre release meta data useful for app store in tauri config
 
 ## Notes Feb 22 2025 7:33 PM
 

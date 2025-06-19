@@ -4,26 +4,18 @@
   "rsc": false,
   "tsx": true,
   "tailwind": {
-    "config": "tailwind.config.js",
-    "css": "styles/globals.css",
-    "baseColor": "gray",
-    "cssVariables": true
+    "config": "",
+    "css": "src/App.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
   },
   "aliases": {
     "components": "@/components",
-    "utils": "@/lib/utils"
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
   },
-  "iconLibrary": "radix",
-  "registries": {
-    "plate": {
-      "style": "default",
-      "tailwind": {
-        "baseColor": "slate"
-      },
-      "aliases": {
-        "ui": "@/components/plate-ui"
-      },
-      "url": "https://platejs.org/r"
-    }
-  }
+  "iconLibrary": "lucide"
 }

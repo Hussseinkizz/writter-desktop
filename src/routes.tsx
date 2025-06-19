@@ -1,11 +1,11 @@
 import { Routes, Route } from "react-router-dom";
-import NotfoundPage from "./pages/notfoundPage";
-import Default from "./pages/default";
+import NotfoundPage from "./notfoundPage";
+import App from "./App";
 
 export default function RoutesConfig() {
   return (
     <Routes>
-      <Route path="/" element={<Default />} />
+      <Route path="/" element={<App />} />
       <Route path="/*" element={<NotfoundPage />} />
     </Routes>
   );
