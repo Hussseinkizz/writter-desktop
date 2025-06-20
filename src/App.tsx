@@ -88,6 +88,7 @@ function App() {
   return (
     <section className="dark flex h-screen w-screen flex-col items-start justify-start overflow-hidden">
       <AppHeader
+        slectedPath={!!selectedPath}
         showPreview={isPreviewOpen}
         togglePreview={() => setIsPreviewOpen(!isPreviewOpen)}
         musicPlaying={false}
@@ -113,6 +114,7 @@ function App() {
               onSync={handleSync}
             />
           }
+          selectedPath={!!selectedPath}
           showPreview={isPreviewOpen}
           middleElement={<Editor value={markdown} onChange={handleChange} />}
           rightSidebarElement={<Preview markdown={markdown} />}

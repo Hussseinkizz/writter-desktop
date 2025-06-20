@@ -22,6 +22,7 @@ type HeaderProps = {
   playMusic: () => void;
   musicPlaying: boolean;
   showPreview: boolean;
+  selectedPath: boolean;
   togglePreview: () => void;
 };
 
@@ -33,6 +34,7 @@ export function AppHeader({
   musicPlaying,
   showPreview,
   togglePreview,
+  selectedPath,
 }: HeaderProps) {
   const [autoSave, setAutoSave] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -136,7 +138,7 @@ export function AppHeader({
         <Button
           size="sm"
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || !selectedPath}
           className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-4 py-2 rounded shadow transition">
           {saving ? (
             <>
