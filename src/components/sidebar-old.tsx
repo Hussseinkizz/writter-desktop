@@ -1,6 +1,6 @@
-import { HiDocument, HiDotsVertical } from "react-icons/hi";
-import { HiPlus } from "react-icons/hi2";
-import { Button } from "./ui/button";
+import { HiDocument, HiDotsVertical } from 'react-icons/hi';
+import { HiPlus } from 'react-icons/hi2';
+import { Button } from './ui/button';
 
 interface Props {}
 

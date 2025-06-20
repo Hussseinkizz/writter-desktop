@@ -4,33 +4,83 @@ import {
   HiClock,
   HiLightBulb,
   HiLightningBolt,
+  HiPencil,
   HiRefresh,
-} from "react-icons/hi";
+} from 'react-icons/hi';
+import { useEffect, useState } from 'react';
 
 export const AppFooter = () => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isWindowFocused, setIsWindowFocused] = useState(true);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsWindowFocused(!document.hidden);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (isWindowFocused) {
+      intervalId = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isWindowFocused]);
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return hours > 0 ? `${hours} Hour ${minutes} mins` : `${minutes} mins`;
+  };
+
   return (
     <header className=" flex h-[5vh] w-full items-center justify-between gap-4 border-t border-zinc-800 bg-neutral-900 px-4 py-1 text-neutral-500 shadow">
-      <div className="flex items-center gap-2">
+      <div
+        className="flex items-center gap-2 cursor-pointer"
+        title="Time Spent Writing">
         <HiClock className="text-sm" />
-        <h1 className="text-sm font-semibold">1 Hour 20 mins</h1>
+        <h1 className="text-sm font-semibold">{formatTime(elapsedTime)}</h1>
       </div>
       {/* The Buttons */}
-      <div className="flex items-center justify-end gap-4">
-        <div className="flex items-center gap-1">
+      <div
+        className="flex items-center justify-end gap-4"
+        title="Spelling Checks">
+        <div className="flex items-center gap-1 cursor-pointer">
           <HiCheckCircle className="text-base" />
           <span className="flex">Grammar</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          title="Current File Size">
           <HiLightningBolt className="text-base" />
-          <span className="flex">772 bytes</span>
+          <span className="flex">0 bytes</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          title="AI Suggestions">
           <HiLightBulb className="text-base" />
           <span className="flex">smart mode</span>
         </div>
-        <div className="flex items-center gap-1">
-          <HiRefresh className="text-base" />
-          <span className="flex">saved</span>
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          title="Word Count">
+          <HiPencil className="text-base" />
+          <span className="flex">0</span>
+          <span className="flex">Words</span>
         </div>
       </div>
     </header>

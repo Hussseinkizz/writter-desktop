@@ -2,12 +2,13 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
+} from '@/components/ui/resizable';
 
 interface Props {
   leftSideBarElement: React.ReactNode;
   middleElement: React.ReactNode;
   rightSidebarElement: React.ReactNode;
+  showPreview?: boolean;
 }
 
 export const ViewLayout = (props: Props) => {
@@ -26,12 +27,16 @@ export const ViewLayout = (props: Props) => {
               {props.middleElement}
             </div>
           </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={40}>
-            <div className="flex h-full w-full items-center justify-center">
-              {props.rightSidebarElement}
-            </div>
-          </ResizablePanel>
+          {props.showPreview && (
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={40}>
+                <div className="flex h-full w-full items-center justify-center">
+                  {props.rightSidebarElement}
+                </div>
+              </ResizablePanel>
+            </>
+          )}
         </ResizablePanelGroup>
       </ResizablePanel>
     </ResizablePanelGroup>
