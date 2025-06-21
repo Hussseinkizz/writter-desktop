@@ -1,46 +1,104 @@
 # ⌘ Writter
 
-![Preview](./public/writter-desktop-alpha.png)
+The minimalistic markdown editor for your notes and thoughts!
 
-An editor for technical writting, blogging and note taking using markdown.
+![Preview](./public/new.png)
 
-> Version: v0.0.1 Alpha
+**Writter** is your dedicated writing app for notes, letters, poems, journal and documentation — all powered by Markdown, with a focus on simplicity, speed, and total control.
 
-## Why?
+> **Version:** v0.0.6 Beta
 
-well why not, most editors around are focused on non technical people, they have drag and drop and notion style experience which is all good, but that is a bit limitting to a technical person who just wants to document things up easily and with full control, now this is where writter comes in, create your markdown files and do anything you want with them, a cloud backup solution will be available but just optional. This geared towards local first, simplicity and full control over how you write your stuff.
+---
 
-## Features And Roadmap
+## Why Choose Writter?
 
-- Save files locally
-- Sync files accross devices and cloud backup
-- All markdown feature support
-- AI auto completions (smart mode)
-- Spell and grammar checking
-- Auto save feature
-- Intuitive UI
-- File Size
-- Builtin markdown guide
-- Web Version
-- Keyboard shortcuts
+Well, most editors around are focused on non technical people, they have drag and drop and notion style experience which is all good, but that is a bit limitting to a technical person who just wants to document things up easily and with full control, now this is where writter comes in, create your markdown files and do anything you want with them, a cloud backup solution will be available but just optional. This geared towards local first, simplicity and full control over how you write your stuff.
 
-## Development
+---
 
- Setup: clone repo, `pnpm install` and then `pnpm run dev2` to start development server!
+## ✨ What You Get
 
-## Project Tech Stack
+- **Lightning-Fast Writing Experience**  
+  Start writing instantly—Writter opens your projects and notes in a snap, so you never lose your creative flow.
 
-- Monaco Editor (Vscode Editor Engine, Used For Editing Markdown)
-- Tauri (Rust + Webview Desktop Development Framework)
-- Supabase Backend (For Cloud Backups Infrastructure)
-- React Js + Vite (With Typescript, Frontend)
-- Shadcn UI Tailwind CSS components library (New York Style)
-- Eslint (Recommended Settings)
-- Prettier (With Tailwind Plugin To Auto Sort Classes)
-- Better Commits (CLI Tool For Conventional Commits Compliance)
+- **Live Markdown Preview**  
+  See your formatted content as you type. Write with confidence and clarity, knowing exactly how your work will look.
 
-And Others Based On [Sleek Stack](/SleekStack.md)
+- **Effortless File Organization**  
+  Manage all your notes and documents in tidy folders. Create, rename, and delete files with a click.
 
-## What Next?
+- **Auto-Save & One-Key Saving**  
+  Never lose your work. Writter saves automatically, and you can hit <kbd>Ctrl+S</kbd> or <kbd>Cmd+S</kbd> anytime for peace of mind.
 
-Well this is my side project and open source so feel free to contribute, reach to me at [hssnkizz@gmail.com](hssnkizz@gmail.com) for any ideas or so, this is work in progress too, don't over expect at this point, thanks!
+- **Always Know Your Word Count**  
+  Stay on top of your productivity with real-time word counts, perfect for meeting deadlines or goals.
+
+- **Built for Focus**  
+  A clean, intuitive sidebar and keyboard shortcuts keep you productive—no distractions, just your words.
+
+- **Seamless Project Switching**  
+  Jump between projects with ease. Writter remembers your last opened folder for a seamless workflow.
+
+- **Instant Feedback**  
+  Get clear, friendly notifications when you save, organize, or manage your notes.
+
+---
+
+## 🚀 Coming Soon
+
+- **Sync Across Devices**  
+  Securely back up and access your notes from anywhere with optional cloud sync.
+
+- **Drag-and-Drop Note Reordering**  
+  Organize your notes exactly how you want with intuitive drag-and-drop.
+
+- **Folder Creation**  
+  Build custom folder structures to match your projects and thinking style.
+
+- **Settings Panel**  
+  Personalize Writter to your workflow with user-friendly settings.
+
+- **Markdown Guide, Spellcheck, and AI Assistance**  
+  Write smarter and faster with built-in guides, error correction, and smart suggestions.
+
+- **Music Player Integration**  
+  Set the mood while you write—right inside Writter.
+
+- **Web Version**  
+  Take your writing anywhere, on any device.
+
+---
+
+## Getting Started
+
+1. **Clone the Repo**
+2. **Install dependencies:**  
+   ```sh
+   pnpm install
+   ```
+3. **Start the app:**  
+   ```sh
+   pnpm tauri dev
+   ```
+
+---
+
+## 💡 Tech Stack
+
+- **Vite**
+- **React**
+- **Tailwind CSS**
+- **shadcn/ui**
+- **CodeMirror**
+- **React Markdown**
+- **Tauri**
+- **Supabase** — Will be used for optional cloud sync (coming soon)
+
+---
+
+## Contributing
+
+Writter is a beta-stage, open-source side project—contributions and ideas are welcome!  
+Reach out: [hssnkizz@gmail.com](mailto:hssnkizz@gmail.com)
+
+> **Note:** This app is under active development. Please expect bugs and missing features, and thank you for your interest and support!
