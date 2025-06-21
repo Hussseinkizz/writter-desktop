@@ -3,7 +3,7 @@ name: 'Build & Release Tauri App'
 on:
   push:
     tags:
-      - 'v*' # Trigger on tags like v1.0.0
+      - 'v*'
 
 jobs:
   build:
@@ -20,13 +20,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'pnpm'
 
       - name: 📥 Install dependencies
         run: |
-          corepack enable
-          corepack prepare pnpm@8.15.4 --activate
+          npm install -g pnpm@8.15.4
           pnpm install
+
       - name: ⚙️ Set up Rust
         uses: actions-rs/toolchain@v1
         with:
