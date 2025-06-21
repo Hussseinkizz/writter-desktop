@@ -3,7 +3,7 @@ name: 'Build & Release Tauri App'
 on:
   push:
     tags:
-      - 'v*' # Triggers on tags like v1.0.0
+      - 'v*' # Trigger on tags like v1.0.0
 
 jobs:
   build:
@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: 🧱 Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 📦 Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'pnpm'
@@ -32,7 +32,6 @@ jobs:
         with:
           toolchain: stable
           override: true
-          target: x86_64-unknown-linux-gnu
 
       - name: 🔧 Install Tauri CLI
         run: pnpm dlx tauri@latest install
@@ -41,11 +40,11 @@ jobs:
         run: pnpm tauri build
 
       - name: 📤 Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}-bundle
           path: |
-            src-tauri/target/release/bundle/**/*
+            src-tauri/target/release/bundle
             !**/*.DS_Store
 
   release:
@@ -54,10 +53,10 @@ jobs:
 
     steps:
       - name: 🧱 Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 📥 Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: ./artifacts
 
