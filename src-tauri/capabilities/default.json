@@ -9,6 +9,20 @@
     "core:default",
     "opener:default",
     "dialog:default",
+    "store:default",
+    {
+      "identifier": "fs:allow-app-read-recursive",
+      "paths": [
+        "*"
+      ]
+    },
+    {
+      "identifier": "fs:allow-app-meta-recursive",
+      "paths": [
+        "*"
+      ]
+    },
+    "store:default",
     "store:default"
   ]
 }

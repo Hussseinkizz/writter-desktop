@@ -14,7 +14,7 @@ interface Props {
 
 export const ViewLayout = (props: Props) => {
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+    <ResizablePanelGroup direction="horizontal" className="h-full dark w-full">
       <ResizablePanel defaultSize={20}>
         <div className="flex h-full w-full items-center justify-center">
           {props.leftSideBarElement}

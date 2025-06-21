@@ -12,6 +12,8 @@ interface Props {
   onNewFolder: () => void;
   onRefresh: () => void;
   onSync: () => void;
+  openSettings: () => void;
+  changeFolder: () => void;
 }
 
 export const SidebarHeader = ({
@@ -19,6 +21,8 @@ export const SidebarHeader = ({
   onNewFolder,
   onRefresh,
   onSync,
+  openSettings,
+  changeFolder,
 }: Props) => {
   return (
     <div className="flex w-full items-center justify-between border-b border-zinc-800 px-4 py-4">
@@ -39,6 +43,10 @@ export const SidebarHeader = ({
         <DropdownMenuContent className="w-32 dark">
           <DropdownMenuItem onClick={onRefresh}>Refresh</DropdownMenuItem>
           <DropdownMenuItem onClick={onSync}>Sync</DropdownMenuItem>
+          <DropdownMenuItem onClick={openSettings}>Settings</DropdownMenuItem>
+          <DropdownMenuItem onClick={changeFolder}>
+            Change Project
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

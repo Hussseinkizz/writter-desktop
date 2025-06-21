@@ -9,7 +9,10 @@ import {
 } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
 
-export const AppFooter = () => {
+type FooterProps = {
+  wordCount: number;
+};
+export const AppFooter = ({ wordCount }: FooterProps) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isWindowFocused, setIsWindowFocused] = useState(true);
 
@@ -79,7 +82,7 @@ export const AppFooter = () => {
           className="flex items-center gap-1 cursor-pointer"
           title="Word Count">
           <HiPencil className="text-base" />
-          <span className="flex">0</span>
+          <span className="flex">{wordCount}</span>
           <span className="flex">Words</span>
         </div>
       </div>

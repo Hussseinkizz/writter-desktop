@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { SidebarHeader } from './header';
 import { SidebarSearch } from './search';
-import { FileTree } from './fileTree';
+import { FileTree } from './file-tree';
 import { FileNode } from '@/utils/build-tree';
 import { filterTreeDeep } from '@/utils/tree-helpers';
 
@@ -17,6 +17,8 @@ interface Props {
   onDrop: (from: string, to: string) => void;
   onRefresh: () => void;
   onSync: () => void;
+  changeFolder: () => void;
+  openSettings: () => void;
 }
 
 export const Sidebar = ({
@@ -31,6 +33,8 @@ export const Sidebar = ({
   onDrop,
   onRefresh,
   onSync,
+  changeFolder,
+  openSettings,
 }: Props) => {
   const [search, setSearch] = useState('');
 
@@ -41,8 +45,10 @@ export const Sidebar = ({
   }, [fileTree, search]);
 
   return (
-    <div className="flex h-full w-full flex-col bg-zinc-900 text-white">
+    <div className="flex dark h-full w-full flex-col bg-zinc-900 text-white">
       <SidebarHeader
+        openSettings={openSettings}
+        changeFolder={changeFolder}
         onNewFile={onCreateNewFile}
         onNewFolder={onCreateNewFolder}
         onRefresh={onRefresh}
@@ -53,7 +59,7 @@ export const Sidebar = ({
         <FileTree
           tree={filteredTree}
           selectedPath={selectedPath}
-          onClick={onFileClick}
+          onFileSelected={onFileClick}
           onRename={onRename}
           onDelete={onDelete}
           onDrop={onDrop}

@@ -22,8 +22,11 @@ type HeaderProps = {
   playMusic: () => void;
   musicPlaying: boolean;
   showPreview: boolean;
+  onAutoSave: (v: boolean) => void;
   selectedPath: boolean;
+  saveFile: () => void;
   togglePreview: () => void;
+  autoSave: boolean;
 };
 
 export function AppHeader({
@@ -34,9 +37,11 @@ export function AppHeader({
   musicPlaying,
   showPreview,
   togglePreview,
+  saveFile,
   selectedPath,
+  onAutoSave,
+  autoSave,
 }: HeaderProps) {
-  const [autoSave, setAutoSave] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -46,9 +51,7 @@ export function AppHeader({
 
   const handleSave = async () => {
     setSaving(true);
-    toast('Saving...');
-    await new Promise((r) => setTimeout(r, 1200));
-    toast.success('Saved note!');
+    saveFile();
     setSaving(false);
   };
 
@@ -124,8 +127,8 @@ export function AppHeader({
         <div className="flex items-center gap-2 mr-3">
           <Switch
             checked={autoSave}
-            onCheckedChange={() => {
-              setAutoSave((v) => !v);
+            onCheckedChange={(v: boolean) => {
+              onAutoSave(v);
               toast(autoSave ? 'Auto Save off' : 'Auto Save on');
             }}
             id="auto-save"
