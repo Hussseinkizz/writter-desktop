@@ -1,9 +1,9 @@
-name: Tauri Build
+name: 'Build & Release Tauri App'
 
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*' # Triggers on tags like v1.0.0
 
 jobs:
   build:
@@ -11,9 +11,63 @@ jobs:
       matrix:
         platform: [macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: tauri-apps/tauri-action@v0
+      - name: 🧱 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          tauriScript: pnpm tauri
-          args: build
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
+        run: |
+          corepack enable
+          pnpm install
+
+      - name: ⚙️ Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          target: x86_64-unknown-linux-gnu
+
+      - name: 🔧 Install Tauri CLI
+        run: pnpm dlx tauri@latest install
+
+      - name: 🏗️ Build app with Tauri
+        run: pnpm tauri build
+
+      - name: 📤 Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.platform }}-bundle
+          path: |
+            src-tauri/target/release/bundle/**/*
+            !**/*.DS_Store
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧱 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./artifacts
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: ./artifacts/**/*.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
