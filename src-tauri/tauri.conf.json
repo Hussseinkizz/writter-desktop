@@ -33,6 +33,12 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "Productivity",
+    "copyright": "MIT",
+    "homepage": "https://github.com/Hussseinkizz/writter-desktop",
+    "publisher": "Hussein Kizz",
+    "shortDescription": "Offline minimalistic markdown editor",
+    "longDescription": "The fully offline-first desktop minimalistic markdown editor for your notes and thoughts!"
   }
 }

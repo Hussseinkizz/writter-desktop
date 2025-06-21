@@ -1,6 +1,6 @@
 # ⌘ Writter
 
-The minimalistic markdown editor for your notes and thoughts!
+The fully offline-first desktop minimalistic markdown editor for your notes and thoughts!
 
 ![Preview](./public/new.png)
 
