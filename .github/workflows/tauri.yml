@@ -3,7 +3,7 @@ name: 'Build & Release Tauri App'
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*' # Trigger on tags like v1.0.0
 
 jobs:
   build:
@@ -20,10 +20,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'pnpm'
 
       - name: 📥 Install dependencies
         run: |
-          npm install -g pnpm@8.15.4
+          corepack enable
+          corepack prepare pnpm@8.15.4 --activate
           pnpm install
 
       - name: ⚙️ Set up Rust
@@ -32,11 +34,8 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: 🔧 Install Tauri CLI
-        run: pnpm dlx @tauri-apps/cli@latest install
-
-      - name: 🏗️ Build app with Tauri
-        run: pnpm tauri build
+      - name: 🏗️ Build Tauri app
+        run: pnpm dlx @tauri-apps/cli@latest build
 
       - name: 📤 Upload artifacts
         uses: actions/upload-artifact@v4
