@@ -33,7 +33,7 @@ jobs:
           override: true
 
       - name: 🔧 Install Tauri CLI
-        run: pnpm dlx @tauri-apps/cli@latest tauri install
+        run: pnpm dlx @tauri-apps/cli@latest install
 
       - name: 🏗️ Build app with Tauri
         run: pnpm tauri build
