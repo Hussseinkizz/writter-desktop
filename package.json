@@ -5,7 +5,7 @@
   "author": "Hussein Kizz",
   "license": "MIT",
   "private": true,
-  "version": "1.0.5",
+  "version": "0.0.6",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -20,6 +20,7 @@ import {
   createFile,
 } from '@/utils/file-handlers';
 import { useSettings } from '@/hooks/use-settings';
+import { LoadingScreen } from './components/loading-screen';
 
 function countWords(text: string): number {
   return text.trim().replace(/\s+/g, ' ').split(' ').filter(Boolean).length;
@@ -48,7 +49,9 @@ function App() {
     undefined
   );
 
-  const [wordCount, setWordCount] = useState(countWords(markdown));
+  const [wordCount, setWordCount] = useState(
+    selectedPath ? countWords(markdown) : 0
+  );
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   const handleSaveFile = useCallback(async () => {
@@ -224,6 +227,8 @@ function App() {
     const dir = await open({ directory: true });
     if (typeof dir === 'string') {
       handleProjectChosen(dir);
+      setSelectedPath(null);
+      setCurrentFile('Unknown');
     }
   };
 
@@ -231,10 +236,19 @@ function App() {
   const handlePlayMusic = () => toast('Music player coming soon');
   const handleStopMusic = () => toast('Music stop feature coming soon');
 
-  // Wait for settings to load before rendering
-  if (!settingsLoaded) return null;
+  const hasLoadedProject = useRef(false);
 
-  if (!projectDir) {
+  useEffect(() => {
+    if (settingsLoaded && projectDir && !hasLoadedProject.current) {
+      hasLoadedProject.current = true;
+      handleProjectChosen(projectDir);
+    }
+  }, [settingsLoaded, projectDir]);
+  if (!settingsLoaded) {
+    return <LoadingScreen />;
+  }
+
+  if (settingsLoaded && !projectDir) {
     return <WelcomeScreen onProjectChosen={handleProjectChosen} />;
   }
 
@@ -285,7 +299,7 @@ function App() {
       <CreateFileDialog
         open={createFileOpen}
         setOpen={setCreateFileOpen}
-        parentPath={projectDir}
+        parentPath={projectDir!}
         fileName={newFileName}
         setFileName={setNewFileName}
         confirmCreate={confirmCreateFile}

@@ -19,15 +19,16 @@ export function useSettings() {
     (async () => {
       const store = await load('.settings.dat', {
         autoSave: true,
-        createNew: true,
       });
       storeRef.current = store;
 
-      const savedDir = (await store.get<string>('lastProjectDir')) ?? null;
-      const savedAutoSave = (await store.get<boolean>('autoSave')) ?? false;
+      const savedDir = await store.get<string>('lastProjectDir');
+      const savedAutoSave = await store.get<boolean>('autoSave');
 
-      setLastProjectDirState(savedDir);
-      setAutoSaveState(savedAutoSave);
+      if (savedDir && savedAutoSave) {
+        setLastProjectDirState(savedDir);
+        setAutoSaveState(savedAutoSave);
+      }
       setLoaded(true);
     })();
   }, []);
