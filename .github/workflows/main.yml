@@ -7,64 +7,51 @@ on:
 
 jobs:
   publish-tauri:
+    permissions:
+      contents: write
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest'
-            target: 'aarch64-apple-darwin'
-          - platform: 'macos-latest'
-            target: 'x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04'
-            target: 'x86_64-unknown-linux-gnu'
-          - platform: 'windows-latest'
-            target: 'x86_64-pc-windows-msvc'
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
 
     runs-on: ${{ matrix.platform }}
-    permissions:
-      contents: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'pnpm'
 
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install system dependencies (Linux only)
-        if: matrix.platform == 'ubuntu-22.04'
+      - if: matrix.platform == 'ubuntu-22.04'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.0-dev \
-            libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf
+          sudo apt update
+          sudo apt install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - run: corepack enable && corepack prepare yarn@stable --activate
 
-      - name: Install dependencies
-        run: pnpm install
+      - run: yarn install
 
-      - name: Build Tauri app
+      - name: Build app
         uses: JonasKruckenberg/tauri-build@v1.0.3
         with:
           args: --target ${{ matrix.target }}
-          debug: false
 
-      - name: Upload Release Artifact
+      - name: Upload artifacts
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/heads/release')
         with:
           files: |
             src-tauri/target/${{ matrix.target }}/release/bundle/**/*
