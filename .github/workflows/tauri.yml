@@ -24,6 +24,12 @@ jobs:
       - name: 📥 Install pnpm
         run: npm i -g pnpm@8.15.4
 
+      - name: 🛠️ Setup pnpm global bin
+        run: |
+          echo "PNPM_HOME=$HOME/.pnpm-global" >> $GITHUB_ENV
+          echo "$HOME/.pnpm-global" >> $GITHUB_PATH
+          mkdir -p $HOME/.pnpm-global
+
       - name: 📥 Install dependencies
         run: pnpm install
 
