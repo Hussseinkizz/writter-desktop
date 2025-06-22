@@ -4,9 +4,9 @@
   "version": "0.0.6",
   "identifier": "com.writter.app",
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "yarn dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "yarn build",
     "frontendDist": "../dist"
   },
   "app": {
