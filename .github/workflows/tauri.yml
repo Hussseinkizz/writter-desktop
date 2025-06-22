@@ -21,11 +21,10 @@ jobs:
         with:
           node-version: '18'
 
-      - name: 📥 Install pnpm
-        run: npm i -g pnpm@8.15.4
-
-      - name: 🛠️ pnpm setup (for global bin)
-        run: pnpm setup
+      - name: 📥 Install pnpm via standalone script
+        run: |
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+        # The script automatically adds PNPM_HOME to PATH for subsequent steps
 
       - name: 📥 Install dependencies
         run: pnpm install
