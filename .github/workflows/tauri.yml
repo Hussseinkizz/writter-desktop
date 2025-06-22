@@ -3,7 +3,7 @@ name: 'Build & Release Tauri App'
 on:
   push:
     tags:
-      - 'v*' # Triggers on tags like v1.0.0
+      - 'v*'
 
 jobs:
   build:
@@ -13,31 +13,13 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - name: 🧱 Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: tauri-apps/tauri-action@v0
         with:
-          node-version: '18'
+          args: 'build'
 
-      - name: 📥 Install dependencies
-        run: npm install
-
-      - name: ⚙️ Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: 🔧 Install Tauri CLI globally
-        run: npm install -g @tauri-apps/cli@latest
-
-      - name: 🏗️ Build app with Tauri
-        run: tauri build
-
-      - name: 📤 Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}-bundle
           path: |
@@ -49,16 +31,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧱 Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 📥 Download all artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           path: ./artifacts
 
-      - name: 🚀 Create GitHub Release
-        uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
