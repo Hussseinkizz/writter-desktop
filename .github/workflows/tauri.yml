@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - platform: 'macos-latest'
-            args: --target universal-apple-darwin
+            target: universal-apple-darwin
           - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
           - platform: 'windows-latest'
 
@@ -55,3 +55,4 @@ jobs:
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
+          args: ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
