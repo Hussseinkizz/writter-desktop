@@ -14,13 +14,17 @@ interface Props {
   onCreateNewFolder: () => void;
   onRename: (path: string, newName: string) => void;
   onDelete: (path: string) => void;
-  onDrop: (from: string, to: string) => void;
+  onMove: (fromPath: string, toFolderPath: string) => void;
   onRefresh: () => void;
   onSync: () => void;
   changeFolder: () => void;
   openSettings: () => void;
 }
 
+/**
+ * Sidebar component for file navigation and management
+ * Updated to use move functionality instead of drag/drop
+ */
 export const Sidebar = ({
   fileTree,
   selectedPath,
@@ -30,7 +34,7 @@ export const Sidebar = ({
   onCreateNewFolder,
   onRename,
   onDelete,
-  onDrop,
+  onMove,
   onRefresh,
   onSync,
   changeFolder,
@@ -62,7 +66,7 @@ export const Sidebar = ({
           onFileSelected={onFileClick}
           onRename={onRename}
           onDelete={onDelete}
-          onDrop={onDrop}
+          onMove={onMove}
           unsavedPaths={unsavedPaths}
         />
       </div>

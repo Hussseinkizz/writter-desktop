@@ -181,8 +181,22 @@ function App() {
     }
   };
 
-  const handleDrop = async (from: string, to: string) => {
-    toast('Notes reordering coming soon!');
+  const handleMove = async (fromPath: string, toFolderPath: string) => {
+    try {
+      const fileName = fromPath.split('/').pop();
+      const newPath = `${toFolderPath}/${fileName}`;
+      await moveFile(fromPath, newPath);
+      toast('File moved successfully!');
+      handleRefresh();
+      
+      // Update selected path if the moved file was selected
+      if (selectedPath === fromPath) {
+        setSelectedPath(newPath);
+        setCurrentFile(fileName || 'Unknown');
+      }
+    } catch {
+      toast('Failed to move file!');
+    }
   };
 
   const handleRefresh = async () => {
@@ -208,14 +222,36 @@ function App() {
       setCreateFileError('No project directory');
       return;
     }
+    
     try {
-      const filePath = `${projectDir}/${newFileName}`;
-      await createFile(filePath, '');
+      // Auto-append .md extension if not present
+      let fileName = newFileName.trim();
+      if (!fileName.endsWith('.md') && !fileName.endsWith('.txt')) {
+        fileName += '.md';
+      }
+      
+      const filePath = `${projectDir}/${fileName}`;
+      await createFile(filePath, '# New Note\n\nStart writing your thoughts here...\n');
       setCreateFileOpen(false);
       setNewFileName('');
       setCreateFileError(undefined);
-      toast('File created!');
+      toast('File created successfully!');
+      
+      // Refresh the file tree
       await handleRefresh();
+      
+      // Auto-open the newly created file
+      setTimeout(async () => {
+        const content = await getFileContent(filePath);
+        if (content !== null) {
+          setMarkdown(content);
+          setWordCount(countWords(content));
+          setCurrentFile(fileName);
+          setSelectedPath(filePath);
+          setUnsavedPaths((prev) => prev.filter((p) => p !== filePath));
+        }
+      }, 100); // Small delay to ensure file tree is refreshed
+      
     } catch {
       setCreateFileError('Failed to create file!');
     }
@@ -282,7 +318,7 @@ function App() {
                 onCreateNewFolder={handleNewFolder}
                 onRename={handleRename}
                 onDelete={handleDelete}
-                onDrop={handleDrop}
+                onMove={handleMove}
                 onRefresh={handleRefresh}
                 onSync={handleSync}
               />

@@ -82,14 +82,14 @@ src/
 - [x] Add thin dark scrollbars
 - [x] Add framer-motion for animations
 
-### Phase 2: File Management Improvements 🔄 IN PROGRESS
-- [ ] Remove drag/drop functionality 
-- [ ] Add context menu with move option
-- [ ] Auto-append .md extensions to new files
-- [ ] Auto-open newly created files
+### Phase 2: File Management Improvements ✅ COMPLETED
+- [x] Remove drag/drop functionality 
+- [x] Add context menu with move option
+- [x] Auto-append .md extensions to new files
+- [x] Auto-open newly created files
 - [ ] OS integration for "open with" markdown files
 
-### Phase 3: Plugin System
+### Phase 3: Plugin System 🔄 IN PROGRESS
 - [ ] Design plugin architecture
 - [ ] Implement content transformation hooks
 - [ ] Add plugin registration system
