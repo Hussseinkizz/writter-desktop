@@ -22,6 +22,8 @@ import {
 } from '@/utils/file-handlers';
 import { useSettings } from '@/hooks/use-settings';
 import { LoadingScreen } from './components/loading-screen';
+import { pluginManager } from '@/plugins/plugin-manager';
+import { builtInPlugins } from '@/plugins/built-in-plugins';
 
 function countWords(text: string): number {
   return text.trim().replace(/\s+/g, ' ').split(' ').filter(Boolean).length;
@@ -55,19 +57,35 @@ function App() {
   );
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // Initialize plugin system
+  useEffect(() => {
+    // Register built-in plugins
+    builtInPlugins.forEach(plugin => {
+      pluginManager.registerPlugin(plugin);
+    });
+
+    // Load plugin configuration from localStorage
+    pluginManager.loadPluginConfig();
+
+    // Cleanup on unmount
+    return () => {
+      pluginManager.savePluginConfig();
+    };
+  }, []);
+
   const handleSaveFile = useCallback(async () => {
     if (!selectedPath) {
       toast('No file selected to save!');
       return;
     }
     try {
-      await saveToFile(selectedPath, markdown);
+      await saveToFile(selectedPath, markdown, projectDir || undefined);
       setUnsavedPaths((prev) => prev.filter((p) => p !== selectedPath));
       toast('File saved!');
     } catch {
       toast('Failed to save file!');
     }
-  }, [selectedPath, markdown]);
+  }, [selectedPath, markdown, projectDir]);
 
   const handleChange = useCallback(
     (val: string) => {
@@ -79,7 +97,7 @@ function App() {
       if (autoSave && selectedPath) {
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
         debounceTimer.current = setTimeout(() => {
-          saveToFile(selectedPath, val)
+          saveToFile(selectedPath, val, projectDir || undefined)
             .then(() =>
               setUnsavedPaths((prev) => prev.filter((p) => p !== selectedPath))
             )
@@ -87,7 +105,7 @@ function App() {
         }, 1000);
       }
     },
-    [autoSave, selectedPath, unsavedPaths]
+    [autoSave, selectedPath, unsavedPaths, projectDir]
   );
 
   useEffect(() => {
@@ -107,13 +125,13 @@ function App() {
     async (content?: string) => {
       if (!selectedPath) return;
       try {
-        await saveToFile(selectedPath, content ?? markdown);
+        await saveToFile(selectedPath, content ?? markdown, projectDir || undefined);
         setUnsavedPaths((prev) => prev.filter((p) => p !== selectedPath));
       } catch {
         toast('Failed to save file!');
       }
     },
-    [selectedPath, markdown]
+    [selectedPath, markdown, projectDir]
   );
 
   const handleFileClick = useCallback(
@@ -125,7 +143,7 @@ function App() {
         }
         await saveCurrentFile();
       }
-      const content = await getFileContent(path);
+      const content = await getFileContent(path, projectDir || undefined);
       if (content === null) {
         toast("Oops! We Couldn't Open That!");
         return;
@@ -136,7 +154,7 @@ function App() {
       setSelectedPath(path);
       setUnsavedPaths((prev) => prev.filter((p) => p !== path));
     },
-    [selectedPath, unsavedPaths, saveCurrentFile]
+    [selectedPath, unsavedPaths, saveCurrentFile, projectDir]
   );
 
   useEffect(() => {
@@ -232,7 +250,7 @@ function App() {
       }
       
       const filePath = `${projectDir}/${fileName}`;
-      await createFile(filePath, '# New Note\n\nStart writing your thoughts here...\n');
+      await createFile(filePath, '# New Note\n\nStart writing your thoughts here...\n', projectDir);
       setCreateFileOpen(false);
       setNewFileName('');
       setCreateFileError(undefined);
@@ -243,7 +261,7 @@ function App() {
       
       // Auto-open the newly created file
       setTimeout(async () => {
-        const content = await getFileContent(filePath);
+        const content = await getFileContent(filePath, projectDir);
         if (content !== null) {
           setMarkdown(content);
           setWordCount(countWords(content));
@@ -301,7 +319,7 @@ function App() {
           setFileTree(tree);
           
           // Open the specific file
-          const content = await getFileContent(filePath);
+          const content = await getFileContent(filePath, parentDir);
           if (content !== null) {
             setMarkdown(content);
             setWordCount(countWords(content));
