@@ -150,35 +150,50 @@ html {
     /* Purple 250 - Green 142 - Blue 230 - Pink 340 */
     /* Change favorite color */
     --text-color-light: hsl(var(--hue-color), 8%, 65%);
-    --scroll-bar-color: hsl(var(--hue-color), 12%, 90%);
-    --scroll-thumb-color: hsl(var(--hue-color), 12%, 80%);
+    --scroll-bar-color: hsl(var(--hue-color), 12%, 15%);
+    --scroll-thumb-color: hsl(var(--hue-color), 12%, 25%);
 }
 
+/* Thin dark scrollbars for all elements */
 ::-webkit-scrollbar {
-    width: 0.4rem; /* Adjust width as desired */
+    width: 6px; /* Thinner scrollbar */
+    height: 6px;
     background-color: var(--scroll-bar-color);
 }
 
 ::-webkit-scrollbar-thumb {
     background-color: var(--scroll-thumb-color);
+    border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text-color-light);
+    background-color: hsl(var(--hue-color), 12%, 35%);
+}
+
+::-webkit-scrollbar-corner {
+    background-color: var(--scroll-bar-color);
+}
+
+/* Firefox scrollbar styling */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb-color) var(--scroll-bar-color);
 }
 
 /* Scrollable class scrollbar */
 .scrollable::-webkit-scrollbar {
-    width: 0.4rem; /* Adjust width as desired */
+    width: 6px; /* Thinner scrollbar */
+    height: 6px;
     background-color: var(--scroll-bar-color);
 }
 
 .scrollable::-webkit-scrollbar-thumb {
     background-color: var(--scroll-thumb-color);
+    border-radius: 3px;
 }
 
 .scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text-color-light);
+    background-color: hsl(var(--hue-color), 12%, 35%);
 }
 
 /* Define the snap points */

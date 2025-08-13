@@ -74,15 +74,15 @@ src/
 
 ## Implementation Phases
 
-### Phase 1: Foundation & Core Fixes ✅ CURRENT
+### Phase 1: Foundation & Core Fixes ✅ COMPLETED
 - [x] Fix build issues and setup
 - [x] Create context.md and task tracking
-- [ ] Add vitest testing setup
-- [ ] Fix preview component (invisible by default)
-- [ ] Add thin dark scrollbars
-- [ ] Add framer-motion for animations
+- [x] Add vitest testing setup
+- [x] Fix preview component (invisible by default)
+- [x] Add thin dark scrollbars
+- [x] Add framer-motion for animations
 
-### Phase 2: File Management Improvements
+### Phase 2: File Management Improvements 🔄 IN PROGRESS
 - [ ] Remove drag/drop functionality 
 - [ ] Add context menu with move option
 - [ ] Auto-append .md extensions to new files

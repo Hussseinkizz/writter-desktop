@@ -39,7 +39,7 @@ function App() {
   const [fileTree, setFileTree] = useState<FileNode[]>([]);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [unsavedPaths, setUnsavedPaths] = useState<string[]>([]);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(true);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [projectName, setProjectName] = useState<string>('Unknown');
   const [currentFile, setCurrentFile] = useState<string>('Unknown');
 
