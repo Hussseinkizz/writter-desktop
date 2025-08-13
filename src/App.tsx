@@ -46,6 +46,7 @@ function App() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [projectName, setProjectName] = useState<string>('Unknown');
   const [currentFile, setCurrentFile] = useState<string>('Unknown');
+  const [musicPlaying, setMusicPlaying] = useState<boolean>(false);
 
   const [createFileOpen, setCreateFileOpen] = useState(false);
   const [newFileName, setNewFileName] = useState('');
@@ -293,6 +294,7 @@ function App() {
   const handleSettings = () => setSettingsOpen(true);
   const handlePlayMusic = () => toast('Music player coming soon');
   const handleStopMusic = () => toast('Music stop feature coming soon');
+  const handleMusicStateChange = (playing: boolean) => setMusicPlaying(playing);
 
   const hasLoadedProject = useRef(false);
 
@@ -348,6 +350,19 @@ function App() {
     };
   }, [settingsLoaded, setLastProjectDir]);
 
+  // Handle inserting content from markdown utilities
+  const handleInsertContent = useCallback((content: string) => {
+    setMarkdown((prev) => {
+      const newContent = prev + '\n\n' + content;
+      setWordCount(countWords(newContent));
+      if (selectedPath && !unsavedPaths.includes(selectedPath)) {
+        setUnsavedPaths((prevPaths) => [...prevPaths, selectedPath]);
+      }
+      return newContent;
+    });
+    toast.success('Content inserted successfully!');
+  }, [selectedPath, unsavedPaths]);
+
   if (!settingsLoaded) {
     return <LoadingScreen />;
   }
@@ -363,7 +378,7 @@ function App() {
           selectedPath={!!selectedPath}
           showPreview={isPreviewOpen}
           togglePreview={() => setIsPreviewOpen(!isPreviewOpen)}
-          musicPlaying={false}
+          musicPlaying={musicPlaying}
           playMusic={handlePlayMusic}
           currentFile={currentFile}
           projectName={projectName}
@@ -371,6 +386,8 @@ function App() {
           saveFile={handleSaveFile}
           autoSave={autoSave}
           onAutoSave={setAutoSave}
+          onInsertContent={handleInsertContent}
+          onMusicStateChange={handleMusicStateChange}
         />
         <main className="flex h-[90vh] w-full flex-auto items-center justify-center overflow-hidden bg-zinc-900 text-white">
           <ViewLayout

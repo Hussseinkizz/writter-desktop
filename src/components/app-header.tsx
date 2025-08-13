@@ -14,6 +14,16 @@ import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { 
+  MarkdownCheatSheet, 
+  SnippetSystem, 
+  TableCreator, 
+  QuickFormatting 
+} from './markdown-utilities';
+import { 
+  BackgroundMusicPlayer, 
+  SimpleTodoManager 
+} from './enhanced-features';
 
 type HeaderProps = {
   projectName: string;
@@ -27,6 +37,8 @@ type HeaderProps = {
   saveFile: () => void;
   togglePreview: () => void;
   autoSave: boolean;
+  onInsertContent: (content: string) => void;
+  onMusicStateChange: (playing: boolean) => void;
 };
 
 export function AppHeader({
@@ -41,6 +53,8 @@ export function AppHeader({
   selectedPath,
   onAutoSave,
   autoSave,
+  onInsertContent,
+  onMusicStateChange,
 }: HeaderProps) {
   const [saving, setSaving] = useState(false);
 
@@ -73,6 +87,14 @@ export function AppHeader({
 
       {/* Right: Buttons */}
       <div className="flex items-center gap-2">
+        {/* Markdown Utilities */}
+        <div className="flex items-center gap-1 mr-2">
+          <MarkdownCheatSheet />
+          <SnippetSystem onInsert={onInsertContent} />
+          <TableCreator onInsert={onInsertContent} />
+          <QuickFormatting onInsert={onInsertContent} />
+        </div>
+        
         {/* Toggle Preview */}
         <Button
           title={showPreview ? 'Hide preview' : 'Show preview'}
@@ -88,21 +110,14 @@ export function AppHeader({
           )}
         </Button>
         {/* Play Music */}
-        <Button
-          title="Play music"
-          variant="ghost"
-          size="icon"
-          onClick={playMusic}
-          className={`rounded-full text-neutral-300 hover:bg-zinc-800 transition ${
-            musicPlaying ? 'text-green-500' : 'text-neutral-400'
-          }`}
-          aria-label={musicPlaying ? 'Stop music' : 'Play music'}>
-          {musicPlaying ? (
-            <HiStop className="text-xl" />
-          ) : (
-            <HiPlay className="text-xl" />
-          )}
-        </Button>
+        <BackgroundMusicPlayer 
+          isPlaying={musicPlaying}
+          onPlayStateChange={onMusicStateChange}
+        />
+        
+        {/* Todo Manager */}
+        <SimpleTodoManager />
+        
         {/* Settings */}
         <Button
           title="Open settings"
