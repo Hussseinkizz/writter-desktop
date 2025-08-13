@@ -87,7 +87,7 @@ src/
 - [x] Add context menu with move option
 - [x] Auto-append .md extensions to new files
 - [x] Auto-open newly created files
-- [ ] OS integration for "open with" markdown files
+- [x] OS integration for "open with" markdown files
 
 ### Phase 3: Plugin System 🔄 IN PROGRESS
 - [ ] Design plugin architecture

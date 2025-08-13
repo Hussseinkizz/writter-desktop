@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
+use tauri::{AppHandle, Manager};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -42,6 +43,19 @@ fn create_file(path: String, content: Option<String>) -> Result<(), String> {
     fs::write(&file_path, content.unwrap_or_default()).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn get_command_line_args() -> Vec<String> {
+    std::env::args().collect()
+}
+
+/// Handle file opening when app is opened with a file argument
+fn handle_file_open_request(app: &AppHandle, file_path: &str) {
+    // Emit an event to the frontend with the file path to open
+    app.emit("open-file-request", file_path).unwrap_or_else(|e| {
+        eprintln!("Failed to emit open-file-request event: {}", e);
+    });
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -56,8 +70,28 @@ pub fn run() {
             save_file,
             delete_file,
             rename_file,
-            create_file
+            create_file,
+            get_command_line_args
         ])
+        .setup(|app| {
+            // Check for command line arguments on startup
+            let args: Vec<String> = std::env::args().collect();
+            
+            // Look for markdown files in command line arguments
+            for arg in args.iter().skip(1) { // Skip the first argument (executable path)
+                let path = PathBuf::from(arg);
+                if path.exists() && path.is_file() {
+                    if let Some(extension) = path.extension() {
+                        if extension == "md" || extension == "markdown" || extension == "txt" {
+                            handle_file_open_request(&app.handle(), arg);
+                            break; // Only handle the first file
+                        }
+                    }
+                }
+            }
+            
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

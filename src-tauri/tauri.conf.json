@@ -39,6 +39,20 @@
     "homepage": "https://github.com/Hussseinkizz/writter-desktop",
     "publisher": "Hussein Kizz",
     "shortDescription": "Offline minimalistic markdown editor",
-    "longDescription": "The fully offline-first desktop minimalistic markdown editor for your notes and thoughts!"
+    "longDescription": "The fully offline-first desktop minimalistic markdown editor for your notes and thoughts!",
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown"],
+        "name": "Markdown Document",
+        "description": "Markdown document file",
+        "role": "Editor"
+      },
+      {
+        "ext": ["txt"],
+        "name": "Text Document", 
+        "description": "Plain text document file",
+        "role": "Editor"
+      }
+    ]
   }
 }

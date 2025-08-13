@@ -11,6 +11,7 @@ import { buildFileTree, FileNode } from '@/utils/build-tree';
 import { BaseDirectory } from '@tauri-apps/plugin-fs';
 import { toast } from 'sonner';
 import { open } from '@tauri-apps/plugin-dialog';
+import { listen } from '@tauri-apps/api/event';
 import {
   getFileContent,
   saveToFile,
@@ -280,6 +281,52 @@ function App() {
       handleProjectChosen(projectDir);
     }
   }, [settingsLoaded, projectDir]);
+
+  // Listen for file open requests from OS (when app is opened with a file)
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    
+    const setupFileOpenListener = async () => {
+      try {
+        unlisten = await listen<string>('open-file-request', async (event) => {
+          const filePath = event.payload;
+          
+          // Set the project directory to the parent folder of the opened file
+          const parentDir = filePath.substring(0, filePath.lastIndexOf('/'));
+          await setLastProjectDir(parentDir);
+          setProjectName(parentDir.split('/').pop() || 'Project');
+          
+          // Build file tree for the parent directory
+          const tree = await buildFileTree(parentDir, BaseDirectory.AppLocalData);
+          setFileTree(tree);
+          
+          // Open the specific file
+          const content = await getFileContent(filePath);
+          if (content !== null) {
+            setMarkdown(content);
+            setWordCount(countWords(content));
+            setCurrentFile(filePath.split('/').pop() || 'Unknown');
+            setSelectedPath(filePath);
+            setUnsavedPaths((prev) => prev.filter((p) => p !== filePath));
+            toast(`Opened file: ${filePath.split('/').pop()}`);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to setup file open listener:', error);
+      }
+    };
+
+    if (settingsLoaded) {
+      setupFileOpenListener();
+    }
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, [settingsLoaded, setLastProjectDir]);
+
   if (!settingsLoaded) {
     return <LoadingScreen />;
   }
