@@ -6,23 +6,41 @@ import {
 } from '@/types/plugin';
 
 /**
- * Plugin Manager class that handles plugin registration, execution, and lifecycle
+ * Plugin Manager factory function that creates a plugin manager instance
  * Implements a simple but powerful plugin system for content transformation
+ * Uses factory pattern instead of classes for functional programming approach
  */
-class PluginManager {
-  private registry: PluginRegistry = {
+export function createPluginManager() {
+  // Private registry state in closure
+  const registry: PluginRegistry = {
     plugins: new Map(),
     enabledPlugins: new Set(),
   };
 
   /**
+   * Create plugin context from file information
+   */
+  const createContext = (filePath: string, projectDir: string): PluginContext => {
+    const fileName = filePath.split('/').pop() || '';
+    const fileExtension = fileName.split('.').pop() || '';
+    
+    return {
+      filePath,
+      fileName,
+      fileExtension,
+      projectDir,
+      timestamp: new Date(),
+    };
+  };
+
+  /**
    * Register a new plugin
    */
-  registerPlugin(plugin: Plugin): void {
-    this.registry.plugins.set(plugin.id, plugin);
+  const registerPlugin = (plugin: Plugin): void => {
+    registry.plugins.set(plugin.id, plugin);
     
     if (plugin.enabled) {
-      this.enablePlugin(plugin.id);
+      enablePlugin(plugin.id);
     }
 
     // Initialize plugin if it has an init function
@@ -34,15 +52,15 @@ class PluginManager {
         });
       }
     }
-  }
+  };
 
   /**
    * Unregister a plugin
    */
-  unregisterPlugin(pluginId: string): void {
-    const plugin = this.registry.plugins.get(pluginId);
+  const unregisterPlugin = (pluginId: string): void => {
+    const plugin = registry.plugins.get(pluginId);
     if (plugin) {
-      this.disablePlugin(pluginId);
+      disablePlugin(pluginId);
       if (plugin.cleanup) {
         const cleanupResult = plugin.cleanup();
         if (cleanupResult instanceof Promise) {
@@ -51,71 +69,55 @@ class PluginManager {
           });
         }
       }
-      this.registry.plugins.delete(pluginId);
+      registry.plugins.delete(pluginId);
     }
-  }
+  };
 
   /**
    * Enable a plugin
    */
-  enablePlugin(pluginId: string): void {
-    const plugin = this.registry.plugins.get(pluginId);
+  const enablePlugin = (pluginId: string): void => {
+    const plugin = registry.plugins.get(pluginId);
     if (plugin) {
       plugin.enabled = true;
-      this.registry.enabledPlugins.add(pluginId);
+      registry.enabledPlugins.add(pluginId);
     }
-  }
+  };
 
   /**
    * Disable a plugin
    */
-  disablePlugin(pluginId: string): void {
-    const plugin = this.registry.plugins.get(pluginId);
+  const disablePlugin = (pluginId: string): void => {
+    const plugin = registry.plugins.get(pluginId);
     if (plugin) {
       plugin.enabled = false;
-      this.registry.enabledPlugins.delete(pluginId);
+      registry.enabledPlugins.delete(pluginId);
     }
-  }
+  };
 
   /**
    * Get all registered plugins
    */
-  getPlugins(): Plugin[] {
-    return Array.from(this.registry.plugins.values());
-  }
+  const getPlugins = (): Plugin[] => {
+    return Array.from(registry.plugins.values());
+  };
 
   /**
    * Get a specific plugin by ID
    */
-  getPlugin(pluginId: string): Plugin | undefined {
-    return this.registry.plugins.get(pluginId);
-  }
-
-  /**
-   * Create plugin context from file information
-   */
-  private createContext(filePath: string, projectDir: string): PluginContext {
-    const fileName = filePath.split('/').pop() || '';
-    const fileExtension = fileName.split('.').pop() || '';
-    
-    return {
-      filePath,
-      fileName,
-      fileExtension,
-      projectDir,
-      timestamp: new Date(),
-    };
-  }
+  const getPlugin = (pluginId: string): Plugin | undefined => {
+    return registry.plugins.get(pluginId);
+  };
 
   /**
    * Execute onSave hooks for all enabled plugins
    */
-  async executeOnSave(content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> {
-    const context = this.createContext(filePath, projectDir);
+  const executeOnSave = async (content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> => {
+    const context = createContext(filePath, projectDir);
     let transformedContent = content;
 
-    for (const pluginId of this.registry.enabledPlugins) {
-      const plugin = this.registry.plugins.get(pluginId);
+    for (const pluginId of registry.enabledPlugins) {
+      const plugin = registry.plugins.get(pluginId);
       if (plugin && plugin.hooks.onSave) {
         try {
           transformedContent = await plugin.hooks.onSave(transformedContent, context);
@@ -134,17 +136,17 @@ class PluginManager {
       success: true,
       content: transformedContent,
     };
-  }
+  };
 
   /**
    * Execute onLoad hooks for all enabled plugins
    */
-  async executeOnLoad(content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> {
-    const context = this.createContext(filePath, projectDir);
+  const executeOnLoad = async (content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> => {
+    const context = createContext(filePath, projectDir);
     let transformedContent = content;
 
-    for (const pluginId of this.registry.enabledPlugins) {
-      const plugin = this.registry.plugins.get(pluginId);
+    for (const pluginId of registry.enabledPlugins) {
+      const plugin = registry.plugins.get(pluginId);
       if (plugin && plugin.hooks.onLoad) {
         try {
           transformedContent = await plugin.hooks.onLoad(transformedContent, context);
@@ -163,17 +165,17 @@ class PluginManager {
       success: true,
       content: transformedContent,
     };
-  }
+  };
 
   /**
    * Execute onContentChange hooks for all enabled plugins
    */
-  async executeOnContentChange(content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> {
-    const context = this.createContext(filePath, projectDir);
+  const executeOnContentChange = async (content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> => {
+    const context = createContext(filePath, projectDir);
     let transformedContent = content;
 
-    for (const pluginId of this.registry.enabledPlugins) {
-      const plugin = this.registry.plugins.get(pluginId);
+    for (const pluginId of registry.enabledPlugins) {
+      const plugin = registry.plugins.get(pluginId);
       if (plugin && plugin.hooks.onContentChange) {
         try {
           transformedContent = await plugin.hooks.onContentChange(transformedContent, context);
@@ -192,37 +194,37 @@ class PluginManager {
       success: true,
       content: transformedContent,
     };
-  }
+  };
 
   /**
    * Save plugin configuration to localStorage
    */
-  savePluginConfig(): void {
-    const pluginConfigs = Array.from(this.registry.plugins.entries()).map(([id, plugin]) => ({
+  const savePluginConfig = (): void => {
+    const pluginConfigs = Array.from(registry.plugins.entries()).map(([id, plugin]) => ({
       id,
       enabled: plugin.enabled,
       config: plugin.config,
     }));
 
     localStorage.setItem('writter-plugin-configs', JSON.stringify(pluginConfigs));
-  }
+  };
 
   /**
    * Load plugin configuration from localStorage
    */
-  loadPluginConfig(): void {
+  const loadPluginConfig = (): void => {
     try {
       const saved = localStorage.getItem('writter-plugin-configs');
       if (saved) {
         const configs = JSON.parse(saved);
         configs.forEach((config: { id: string; enabled: boolean; config: any }) => {
-          const plugin = this.registry.plugins.get(config.id);
+          const plugin = registry.plugins.get(config.id);
           if (plugin) {
             plugin.enabled = config.enabled;
             plugin.config = { ...plugin.config, ...config.config };
             
             if (plugin.enabled) {
-              this.registry.enabledPlugins.add(config.id);
+              registry.enabledPlugins.add(config.id);
             }
           }
         });
@@ -230,10 +232,23 @@ class PluginManager {
     } catch (error) {
       console.error('Failed to load plugin config:', error);
     }
-  }
+  };
+
+  // Return object with all methods
+  return {
+    registerPlugin,
+    unregisterPlugin,
+    enablePlugin,
+    disablePlugin,
+    getPlugins,
+    getPlugin,
+    executeOnSave,
+    executeOnLoad,
+    executeOnContentChange,
+    savePluginConfig,
+    loadPluginConfig,
+  };
 }
 
-// Create a singleton instance
-export const pluginManager = new PluginManager();
-
-export { PluginManager };
+// Create a singleton instance using the factory
+export const pluginManager = createPluginManager();

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { PluginManager } from '../plugins/plugin-manager'
+import { createPluginManager } from '../plugins/plugin-manager'
 import { Plugin } from '../types/plugin'
 
 describe('Plugin System', () => {
-  let pluginManager: PluginManager
+  let pluginManager: ReturnType<typeof createPluginManager>
 
   const mockPlugin: Plugin = {
     id: 'test-plugin',
@@ -20,7 +20,7 @@ describe('Plugin System', () => {
   }
 
   beforeEach(() => {
-    pluginManager = new PluginManager()
+    pluginManager = createPluginManager()
   })
 
   it('should register and retrieve plugins', () => {

@@ -7,6 +7,7 @@ import { Editor } from '@/components/new-editor';
 import { Preview } from '@/components/new-preview';
 import { Sidebar } from '@/components/sidebar/sidebar';
 import { CreateFileDialog } from '@/components/sidebar/create-file-dialog';
+import { SettingsDialog } from '@/components/settings';
 import { buildFileTree, FileNode } from '@/utils/build-tree';
 import { BaseDirectory } from '@tauri-apps/plugin-fs';
 import { toast } from 'sonner';
@@ -287,7 +288,9 @@ function App() {
     }
   };
 
-  const handleSettings = () => toast('Settings panel coming soon');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const handleSettings = () => setSettingsOpen(true);
   const handlePlayMusic = () => toast('Music player coming soon');
   const handleStopMusic = () => toast('Music stop feature coming soon');
 
@@ -406,6 +409,8 @@ function App() {
         confirmCreate={confirmCreateFile}
         errorMessage={createFileError}
       />
+
+      <SettingsDialog />
     </>
   );
 }
