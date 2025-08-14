@@ -1,22 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { load, Store } from '@tauri-apps/plugin-store';
-
-type Settings = {
-  lastProjectDir: string | null;
-  autoSave: boolean;
-  autoSaveInterval: number; // in milliseconds
-  theme: 'light' | 'dark' | 'system';
-  fontSize: number;
-  fontFamily: string;
-  wordWrap: boolean;
-  showLineNumbers: boolean;
-  tabSize: number;
-  enableVimMode: boolean;
-  enableSpellCheck: boolean;
-  previewPosition: 'right' | 'bottom' | 'hidden';
-  showWordCount: boolean;
-  maxRecentFiles: number;
-};
+import { Settings, settingsSchema, validateSettings } from '../lib/validation';
+import { toast } from 'sonner';
 
 const defaultSettings: Settings = {
   lastProjectDir: null,
@@ -33,6 +18,15 @@ const defaultSettings: Settings = {
   previewPosition: 'right',
   showWordCount: true,
   maxRecentFiles: 10,
+  musicPlayer: {
+    volume: 50,
+    autoplay: false,
+    loop: true,
+    fadeInOut: true,
+    customTracks: [],
+    musicSource: 'streaming',
+    localMusicDirectory: undefined
+  }
 };
 
 export function useSettings() {
@@ -43,20 +37,38 @@ export function useSettings() {
   // Load store on mount
   useEffect(() => {
     (async () => {
-      const store = await load('.settings.dat', {
-        autoSave: true,
-      });
-      storeRef.current = store;
+      try {
+        const store = await load('.settings.dat', {
+          autoSave: true,
+        });
+        storeRef.current = store;
 
-      // Load all settings with defaults
-      const savedSettings: Partial<Settings> = {};
-      for (const [key, defaultValue] of Object.entries(defaultSettings)) {
-        const savedValue = await store.get<any>(key);
-        savedSettings[key as keyof Settings] = savedValue !== null ? savedValue : defaultValue;
+        // Load all settings with validation
+        const savedSettings: Record<string, any> = {};
+        for (const [key] of Object.entries(defaultSettings)) {
+          const savedValue = await store.get<any>(key);
+          if (savedValue !== null) {
+            savedSettings[key] = savedValue;
+          }
+        }
+
+        // Validate and merge with defaults
+        const validationResult = validateSettings({ ...defaultSettings, ...savedSettings });
+        if (validationResult.isValid && validationResult.data) {
+          setSettingsState(validationResult.data);
+        } else {
+          console.warn('Invalid settings detected, using defaults:', validationResult.error);
+          toast.error('Settings validation failed, using defaults');
+          setSettingsState(defaultSettings);
+        }
+
+        setLoaded(true);
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+        toast.error('Failed to load settings');
+        setSettingsState(defaultSettings);
+        setLoaded(true);
       }
-
-      setSettingsState({ ...defaultSettings, ...savedSettings });
-      setLoaded(true);
     })();
   }, []);
 
@@ -64,30 +76,62 @@ export function useSettings() {
     key: K,
     value: Settings[K]
   ): Promise<void> => {
-    setSettingsState(prev => ({ ...prev, [key]: value }));
-    if (storeRef.current) {
-      await storeRef.current.set(key, value);
-      await storeRef.current.save();
+    try {
+      const newSettings = { ...settings, [key]: value };
+      const validationResult = validateSettings(newSettings);
+      
+      if (!validationResult.isValid) {
+        toast.error(`Invalid setting value: ${validationResult.error}`);
+        return;
+      }
+
+      setSettingsState(validationResult.data!);
+      if (storeRef.current) {
+        await storeRef.current.set(key, value);
+        await storeRef.current.save();
+      }
+    } catch (error) {
+      console.error('Failed to update setting:', error);
+      toast.error('Failed to save setting');
     }
   };
 
   const updateSettings = async (newSettings: Partial<Settings>): Promise<void> => {
-    setSettingsState(prev => ({ ...prev, ...newSettings }));
-    if (storeRef.current) {
-      for (const [key, value] of Object.entries(newSettings)) {
-        await storeRef.current.set(key, value);
+    try {
+      const mergedSettings = { ...settings, ...newSettings };
+      const validationResult = validateSettings(mergedSettings);
+      
+      if (!validationResult.isValid) {
+        toast.error(`Invalid settings: ${validationResult.error}`);
+        return;
       }
-      await storeRef.current.save();
+
+      setSettingsState(validationResult.data!);
+      if (storeRef.current) {
+        for (const [key, value] of Object.entries(newSettings)) {
+          await storeRef.current.set(key, value);
+        }
+        await storeRef.current.save();
+      }
+    } catch (error) {
+      console.error('Failed to update settings:', error);
+      toast.error('Failed to save settings');
     }
   };
 
   const resetSettings = async (): Promise<void> => {
-    setSettingsState(defaultSettings);
-    if (storeRef.current) {
-      for (const [key, value] of Object.entries(defaultSettings)) {
-        await storeRef.current.set(key, value);
+    try {
+      setSettingsState(defaultSettings);
+      if (storeRef.current) {
+        for (const [key, value] of Object.entries(defaultSettings)) {
+          await storeRef.current.set(key, value);
+        }
+        await storeRef.current.save();
       }
-      await storeRef.current.save();
+      toast.success('Settings reset to defaults');
+    } catch (error) {
+      console.error('Failed to reset settings:', error);
+      toast.error('Failed to reset settings');
     }
   };
 
