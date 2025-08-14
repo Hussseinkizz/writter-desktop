@@ -1,109 +1,115 @@
+import { z } from 'zod';
+
 /**
- * Plugin System Types and Interfaces
+ * Plugin System Types and Interfaces with Zod validation
  * 
  * This module defines the core plugin architecture for the Writter application.
  * Plugins can hook into content transformation during save, load, and editing operations.
  */
 
 /**
- * Context object passed to plugin hooks containing metadata about the current operation
+ * Context object schema passed to plugin hooks containing metadata about the current operation
  */
-export interface PluginContext {
-  filePath: string;
-  fileName: string;
-  fileExtension: string;
-  projectDir: string;
-  timestamp: Date;
-}
+export const pluginContextSchema = z.object({
+  filePath: z.string().min(1, 'File path is required'),
+  fileName: z.string().min(1, 'File name is required'),
+  fileExtension: z.string(),
+  projectDir: z.string().min(1, 'Project directory is required'),
+  timestamp: z.date()
+});
 
 /**
- * Plugin hook functions that can transform content at different lifecycle points
+ * Plugin configuration schema
  */
-export interface PluginHooks {
-  /**
-   * Transform content before saving to file
-   * @param content - The markdown content to be saved
-   * @param context - Metadata about the current operation
-   * @returns The transformed content or a promise resolving to transformed content
-   */
-  onSave?: (content: string, context: PluginContext) => string | Promise<string>;
-
-  /**
-   * Transform content after loading from file
-   * @param content - The markdown content loaded from file
-   * @param context - Metadata about the current operation
-   * @returns The transformed content or a promise resolving to transformed content
-   */
-  onLoad?: (content: string, context: PluginContext) => string | Promise<string>;
-
-  /**
-   * Transform content during editing (debounced)
-   * @param content - The current markdown content being edited
-   * @param context - Metadata about the current operation
-   * @returns The transformed content or a promise resolving to transformed content
-   */
-  onContentChange?: (content: string, context: PluginContext) => string | Promise<string>;
-}
+export const pluginConfigSchema = z.record(z.unknown());
 
 /**
- * Plugin configuration options
+ * Plugin hook functions schema
  */
-export interface PluginConfig {
-  [key: string]: any;
-}
+export const pluginHooksSchema = z.object({
+  onSave: z.function()
+    .args(z.string(), pluginContextSchema)
+    .returns(z.union([z.string(), z.promise(z.string())]))
+    .optional(),
+  onLoad: z.function()
+    .args(z.string(), pluginContextSchema)
+    .returns(z.union([z.string(), z.promise(z.string())]))
+    .optional(),
+  onContentChange: z.function()
+    .args(z.string(), pluginContextSchema)
+    .returns(z.union([z.string(), z.promise(z.string())]))
+    .optional()
+});
 
 /**
- * Main plugin interface that all plugins must implement
+ * Main plugin schema that all plugins must implement
  */
-export interface Plugin {
-  /** Unique identifier for the plugin */
-  id: string;
-  
-  /** Human-readable name of the plugin */
-  name: string;
-  
-  /** Description of what the plugin does */
-  description: string;
-  
-  /** Plugin version */
-  version: string;
-  
-  /** Plugin author */
-  author: string;
-  
-  /** Whether the plugin is currently enabled */
-  enabled: boolean;
-  
-  /** Plugin configuration options */
-  config: PluginConfig;
-  
-  /** Hook functions for content transformation */
-  hooks: PluginHooks;
-  
-  /**
-   * Initialize the plugin (called when plugin is loaded)
-   */
-  init?: () => void | Promise<void>;
-  
-  /**
-   * Cleanup when plugin is disabled or unloaded
-   */
-  cleanup?: () => void | Promise<void>;
-}
+export const pluginSchema = z.object({
+  id: z.string().min(1, 'Plugin ID is required'),
+  name: z.string().min(1, 'Plugin name is required'),
+  description: z.string().min(1, 'Plugin description is required'),
+  version: z.string().min(1, 'Plugin version is required'),
+  author: z.string().min(1, 'Plugin author is required'),
+  enabled: z.boolean().default(true),
+  config: pluginConfigSchema.default({}),
+  hooks: pluginHooksSchema.default({}),
+  init: z.function()
+    .returns(z.union([z.void(), z.promise(z.void())]))
+    .optional(),
+  cleanup: z.function()
+    .returns(z.union([z.void(), z.promise(z.void())]))
+    .optional()
+});
 
 /**
- * Plugin registry state
+ * Plugin execution result schema
+ */
+export const pluginExecutionResultSchema = z.object({
+  success: z.boolean(),
+  content: z.string(),
+  error: z.string().optional()
+});
+
+/**
+ * Validation helper functions
+ */
+export const validatePlugin = (plugin: unknown): { isValid: boolean; error?: string; data?: Plugin } => {
+  try {
+    const validatedPlugin = pluginSchema.parse(plugin);
+    return { isValid: true, data: validatedPlugin };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { isValid: false, error: error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ') };
+    }
+    return { isValid: false, error: 'Invalid plugin data' };
+  }
+};
+
+export const validatePluginContext = (context: unknown): { isValid: boolean; error?: string; data?: PluginContext } => {
+  try {
+    const validatedContext = pluginContextSchema.parse(context);
+    return { isValid: true, data: validatedContext };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { isValid: false, error: error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ') };
+    }
+    return { isValid: false, error: 'Invalid plugin context' };
+  }
+};
+
+/**
+ * Type exports for use throughout the application
+ */
+export type PluginContext = z.infer<typeof pluginContextSchema>;
+export type PluginConfig = z.infer<typeof pluginConfigSchema>;
+export type PluginHooks = z.infer<typeof pluginHooksSchema>;
+export type Plugin = z.infer<typeof pluginSchema>;
+export type PluginExecutionResult = z.infer<typeof pluginExecutionResultSchema>;
+
+/**
+ * Plugin registry state (doesn't need Zod validation as it's internal)
  */
 export interface PluginRegistry {
   plugins: Map<string, Plugin>;
   enabledPlugins: Set<string>;
-}
-
-/**
- * Plugin execution result
- */
-export interface PluginExecutionResult {
-  success: boolean;
-  content: string;
-  error?: string;
 }

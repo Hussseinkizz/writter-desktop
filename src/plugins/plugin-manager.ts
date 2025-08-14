@@ -2,8 +2,11 @@ import {
   Plugin, 
   PluginContext, 
   PluginRegistry, 
-  PluginExecutionResult 
+  PluginExecutionResult,
+  validatePlugin,
+  validatePluginContext
 } from '@/types/plugin';
+import { toast } from 'sonner';
 
 /**
  * Plugin Manager factory function that creates a plugin manager instance
@@ -34,24 +37,40 @@ export function createPluginManager() {
   };
 
   /**
-   * Register a new plugin
+   * Register a new plugin with validation
    */
   const registerPlugin = (plugin: Plugin): void => {
-    registry.plugins.set(plugin.id, plugin);
+    const validation = validatePlugin(plugin);
+    if (!validation.isValid) {
+      console.error(`Failed to register plugin: ${validation.error}`);
+      toast.error(`Plugin registration failed: ${validation.error}`);
+      return;
+    }
+
+    const validatedPlugin = validation.data!;
+    registry.plugins.set(validatedPlugin.id, validatedPlugin);
     
-    if (plugin.enabled) {
-      enablePlugin(plugin.id);
+    if (validatedPlugin.enabled) {
+      enablePlugin(validatedPlugin.id);
     }
 
     // Initialize plugin if it has an init function
-    if (plugin.init) {
-      const initResult = plugin.init();
-      if (initResult instanceof Promise) {
-        initResult.catch((error: any) => {
-          console.error(`Failed to initialize plugin ${plugin.id}:`, error);
-        });
+    if (validatedPlugin.init) {
+      try {
+        const initResult = validatedPlugin.init();
+        if (initResult instanceof Promise) {
+          initResult.catch((error: any) => {
+            console.error(`Plugin ${validatedPlugin.id} initialization failed:`, error);
+            toast.error(`Plugin ${validatedPlugin.name} failed to initialize`);
+          });
+        }
+      } catch (error) {
+        console.error(`Plugin ${validatedPlugin.id} initialization failed:`, error);
+        toast.error(`Plugin ${validatedPlugin.name} failed to initialize`);
       }
     }
+
+    console.log(`Plugin registered: ${validatedPlugin.name} (${validatedPlugin.id})`);
   };
 
   /**
@@ -110,10 +129,21 @@ export function createPluginManager() {
   };
 
   /**
-   * Execute onSave hooks for all enabled plugins
+   * Execute onSave hooks for all enabled plugins with validation
    */
   const executeOnSave = async (content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> => {
     const context = createContext(filePath, projectDir);
+    
+    // Validate context
+    const contextValidation = validatePluginContext(context);
+    if (!contextValidation.isValid) {
+      return {
+        success: false,
+        content,
+        error: `Invalid plugin context: ${contextValidation.error}`,
+      };
+    }
+
     let transformedContent = content;
 
     for (const pluginId of registry.enabledPlugins) {
@@ -139,10 +169,21 @@ export function createPluginManager() {
   };
 
   /**
-   * Execute onLoad hooks for all enabled plugins
+   * Execute onLoad hooks for all enabled plugins with validation
    */
   const executeOnLoad = async (content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> => {
     const context = createContext(filePath, projectDir);
+    
+    // Validate context
+    const contextValidation = validatePluginContext(context);
+    if (!contextValidation.isValid) {
+      return {
+        success: false,
+        content,
+        error: `Invalid plugin context: ${contextValidation.error}`,
+      };
+    }
+
     let transformedContent = content;
 
     for (const pluginId of registry.enabledPlugins) {
@@ -168,10 +209,21 @@ export function createPluginManager() {
   };
 
   /**
-   * Execute onContentChange hooks for all enabled plugins
+   * Execute onContentChange hooks for all enabled plugins with validation
    */
   const executeOnContentChange = async (content: string, filePath: string, projectDir: string): Promise<PluginExecutionResult> => {
     const context = createContext(filePath, projectDir);
+    
+    // Validate context
+    const contextValidation = validatePluginContext(context);
+    if (!contextValidation.isValid) {
+      return {
+        success: false,
+        content,
+        error: `Invalid plugin context: ${contextValidation.error}`,
+      };
+    }
+
     let transformedContent = content;
 
     for (const pluginId of registry.enabledPlugins) {

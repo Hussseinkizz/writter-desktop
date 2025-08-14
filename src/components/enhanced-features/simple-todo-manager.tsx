@@ -19,18 +19,41 @@ import {
   HiRefresh
 } from 'react-icons/hi';
 import { toast } from 'sonner';
+import { z } from 'zod';
+
+/**
+ * Todo item validation schema
+ */
+const todoItemSchema = z.object({
+  id: z.string().min(1, 'Todo ID is required'),
+  text: z.string().min(1, 'Todo text is required'),
+  status: z.enum(['todo', 'done', 'pending'], {
+    errorMap: () => ({ message: 'Status must be todo, done, or pending' })
+  }),
+  createdAt: z.date(),
+  completedAt: z.date().optional(),
+  priority: z.enum(['low', 'medium', 'high']).default('medium')
+});
 
 /**
  * Todo item interface
  */
-interface TodoItem {
-  id: string;
-  text: string;
-  status: 'todo' | 'done' | 'pending';
-  createdAt: Date;
-  completedAt?: Date;
-  priority?: 'low' | 'medium' | 'high';
-}
+type TodoItem = z.infer<typeof todoItemSchema>;
+
+/**
+ * Validation helper functions
+ */
+const validateTodoItem = (item: unknown): { isValid: boolean; error?: string; data?: TodoItem } => {
+  try {
+    const validatedItem = todoItemSchema.parse(item);
+    return { isValid: true, data: validatedItem };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { isValid: false, error: error.errors.map(e => e.message).join(', ') };
+    }
+    return { isValid: false, error: 'Invalid todo item' };
+  }
+};
 
 /**
  * Todo manager storage key
@@ -38,44 +61,81 @@ interface TodoItem {
 const STORAGE_KEY = 'writter-todo-manager';
 
 /**
- * Create a new todo item
+ * Create a new todo item with validation
  */
-const createTodoItem = (text: string): TodoItem => {
-  return {
-    id: crypto.randomUUID(),
-    text: text.trim(),
-    status: 'todo',
-    createdAt: new Date(),
-    priority: 'medium',
-  };
+const createTodoItem = (text: string): TodoItem | null => {
+  try {
+    const item = {
+      id: crypto.randomUUID(),
+      text: text.trim(),
+      status: 'todo' as const,
+      createdAt: new Date(),
+      priority: 'medium' as const,
+    };
+    
+    const validation = validateTodoItem(item);
+    if (!validation.isValid) {
+      toast.error(`Invalid todo item: ${validation.error}`);
+      return null;
+    }
+    
+    return validation.data!;
+  } catch (error) {
+    toast.error('Failed to create todo item');
+    return null;
+  }
 };
 
 /**
- * Load todos from localStorage
+ * Load todos from localStorage with validation
  */
 const loadTodos = (): TodoItem[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      return parsed.map((item: any) => ({
-        ...item,
-        createdAt: new Date(item.createdAt),
-        completedAt: item.completedAt ? new Date(item.completedAt) : undefined,
-      }));
+      const validatedTodos: TodoItem[] = [];
+      
+      for (const item of parsed) {
+        const itemWithDates = {
+          ...item,
+          createdAt: new Date(item.createdAt),
+          completedAt: item.completedAt ? new Date(item.completedAt) : undefined,
+        };
+        
+        const validation = validateTodoItem(itemWithDates);
+        if (validation.isValid && validation.data) {
+          validatedTodos.push(validation.data);
+        } else {
+          console.warn('Invalid todo item found in storage:', validation.error);
+        }
+      }
+      
+      return validatedTodos;
     }
   } catch (error) {
     console.error('Failed to load todos:', error);
+    toast.error('Failed to load todos');
   }
   return [];
 };
 
 /**
- * Save todos to localStorage
+ * Save todos to localStorage with validation
  */
 const saveTodos = (todos: TodoItem[]): void => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+    // Validate all todos before saving
+    const validTodos = todos.filter(todo => {
+      const validation = validateTodoItem(todo);
+      if (!validation.isValid) {
+        console.warn('Invalid todo item, skipping save:', validation.error);
+        return false;
+      }
+      return true;
+    });
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(validTodos));
   } catch (error) {
     console.error('Failed to save todos:', error);
     toast.error('Failed to save todos');
@@ -217,6 +277,11 @@ export const SimpleTodoManager = () => {
     }
 
     const newTodo = createTodoItem(text);
+    if (!newTodo) {
+      // Error already shown by createTodoItem
+      return;
+    }
+
     setTodos(prev => [newTodo, ...prev]);
     setNewTodoText('');
     toast.success('Todo added successfully');
