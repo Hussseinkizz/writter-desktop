@@ -89,7 +89,7 @@ export function createMusicTrackManager() {
 
       const newTrack = validation.data!;
       
-      // Validate URL/file path specifically
+      // Additional validation for URL/file path based on isLocal flag
       if (newTrack.isLocal) {
         const pathValidation = validateFilePath(newTrack.url);
         if (!pathValidation.isValid) {
@@ -145,8 +145,23 @@ export function createMusicTrackManager() {
       return { success: false, error: validation.error };
     }
 
-    customTracks[trackIndex] = validation.data!;
-    toast.success(`Updated track: ${validation.data!.name}`);
+    const validatedTrack = validation.data!;
+    
+    // Additional validation for URL/file path based on isLocal flag
+    if (validatedTrack.isLocal) {
+      const pathValidation = validateFilePath(validatedTrack.url);
+      if (!pathValidation.isValid) {
+        return { success: false, error: `Invalid file path: ${pathValidation.error}` };
+      }
+    } else {
+      const urlValidation = validateUrl(validatedTrack.url);
+      if (!urlValidation.isValid) {
+        return { success: false, error: `Invalid URL: ${urlValidation.error}` };
+      }
+    }
+
+    customTracks[trackIndex] = validatedTrack;
+    toast.success(`Updated track: ${validatedTrack.name}`);
     return { success: true };
   };
 
