@@ -7,7 +7,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useState, useEffect } from 'react';
 import { FileNode } from '@/utils/build-tree';
 import { HiFolder } from 'react-icons/hi2';
@@ -34,24 +40,32 @@ export const MoveFileDialog = ({
   const [selectedFolder, setSelectedFolder] = useState<string>('');
 
   // Get all folders from the tree (excluding the current file's parent)
-  const getAllFolders = (nodes: FileNode[], currentFilePath: string | null): FileNode[] => {
+  const getAllFolders = (
+    nodes: FileNode[],
+    currentFilePath: string | null
+  ): FileNode[] => {
     let folders: FileNode[] = [];
-    
+
     for (const node of nodes) {
       if (node.isDir) {
         // Don't include the current file's parent folder
-        const currentFileParent = currentFilePath?.substring(0, currentFilePath.lastIndexOf('/'));
+        const currentFileParent = currentFilePath?.substring(
+          0,
+          currentFilePath.lastIndexOf('/')
+        );
         if (node.path !== currentFileParent) {
           folders.push(node);
         }
-        
+
         // Recursively get subfolders
         if (node.children) {
-          folders = folders.concat(getAllFolders(node.children, currentFilePath));
+          folders = folders.concat(
+            getAllFolders(node.children, currentFilePath)
+          );
         }
       }
     }
-    
+
     return folders;
   };
 
@@ -75,16 +89,18 @@ export const MoveFileDialog = ({
   const fileName = movingFilePath ? movingFilePath.split('/').pop() : '';
 
   return (
-    <Dialog open={!!movingFilePath} onOpenChange={() => setMovingFilePath(null)}>
+    <Dialog
+      open={!!movingFilePath}
+      onOpenChange={() => setMovingFilePath(null)}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Move File</DialogTitle>
           <DialogDescription>
             Choose a destination folder for{' '}
-            <span className="font-mono text-blue-400">{fileName}</span>
+            <span className="font-mono text-violet-500">{fileName}</span>
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium mb-2 block">
@@ -103,7 +119,7 @@ export const MoveFileDialog = ({
                   availableFolders.map((folder) => (
                     <SelectItem key={folder.path} value={folder.path}>
                       <div className="flex items-center gap-2">
-                        <HiFolder className="text-blue-400" />
+                        <HiFolder className="text-violet-500" />
                         <span>{getDisplayPath(folder.path)}</span>
                       </div>
                     </SelectItem>
@@ -115,16 +131,10 @@ export const MoveFileDialog = ({
         </div>
 
         <DialogFooter className="flex gap-2">
-          <Button 
-            variant="secondary" 
-            onClick={() => setMovingFilePath(null)}
-          >
+          <Button variant="secondary" onClick={() => setMovingFilePath(null)}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleMove}
-            disabled={!selectedFolder}
-          >
+          <Button onClick={handleMove} disabled={!selectedFolder}>
             Move File
           </Button>
         </DialogFooter>

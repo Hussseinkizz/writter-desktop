@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 interface Props {
   onNewFile: () => void;
@@ -24,6 +25,10 @@ export const SidebarHeader = ({
   openSettings,
   changeFolder,
 }: Props) => {
+  const handleSettingsClick = () => {
+    toast('Settings coming soon! 🚀');
+  };
+
   return (
     <div className="flex w-full items-center justify-between border-b border-zinc-800 px-4 py-4">
       <div className="flex gap-2">
@@ -43,7 +48,7 @@ export const SidebarHeader = ({
         <DropdownMenuContent className="w-32 dark">
           <DropdownMenuItem onClick={onRefresh}>Refresh</DropdownMenuItem>
           <DropdownMenuItem onClick={onSync}>Sync</DropdownMenuItem>
-          <DropdownMenuItem onClick={openSettings}>Settings</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSettingsClick}>Settings</DropdownMenuItem>
           <DropdownMenuItem onClick={changeFolder}>
             Change Project
           </DropdownMenuItem>

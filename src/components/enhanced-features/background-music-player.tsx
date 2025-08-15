@@ -1,236 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/button';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '../ui/dialog';
 import { Slider } from '../ui/slider';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { 
-  HiPlay, 
-  HiPause, 
-  HiStop, 
-  HiVolumeUp, 
-  HiVolumeOff,
+import { ScrollArea } from '../ui/scroll-area';
+import {
+  HiPlay,
+  HiPause,
+  HiStop,
+  HiVolumeUp,
   HiMusicNote,
   HiRefresh,
-  HiPlus,
-  HiTrash,
-  HiFolder
+  HiExclamationCircle,
+  HiWifi,
 } from 'react-icons/hi';
 import { toast } from 'sonner';
 import { useSettings } from '../../hooks/use-settings';
-import { MusicTrack, MusicPlayerSettings, validateUrl, validateFilePath } from '../../lib/validation';
-import { musicTrackManager } from '../../lib/music-track-manager';
-
-/**
- * Add custom track form component
- */
-const AddCustomTrackForm = ({ onAdd, onCancel }: { 
-  onAdd: (track: Partial<MusicTrack>) => void; 
-  onCancel: () => void; 
-}) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    url: '',
-    category: 'custom' as MusicTrack['category'],
-    isLocal: false
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.description || !formData.url) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    // Validate URL or file path
-    const validation = formData.isLocal 
-      ? validateFilePath(formData.url)
-      : validateUrl(formData.url);
-    
-    if (!validation.isValid) {
-      toast.error(validation.error || 'Invalid URL or file path');
-      return;
-    }
-
-    onAdd(formData);
-    setFormData({ name: '', description: '', url: '', category: 'custom', isLocal: false });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-neutral-800/30 rounded-lg">
-      <h4 className="font-semibold text-neutral-200">Add Custom Track</h4>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="track-name">Track Name *</Label>
-          <Input
-            id="track-name"
-            value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Enter track name"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="track-category">Category</Label>
-          <select
-            id="track-category"
-            value={formData.category}
-            onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as MusicTrack['category'] }))}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="nature">Nature</option>
-            <option value="lofi">Lofi</option>
-            <option value="ambient">Ambient</option>
-            <option value="custom">Custom</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="track-description">Description *</Label>
-        <Input
-          id="track-description"
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          placeholder="Describe the track"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center space-x-2">
-          <Switch
-            checked={formData.isLocal}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isLocal: checked, url: '' }))}
-          />
-          <Label>Local file (instead of streaming URL)</Label>
-        </div>
-        
-        <div>
-          <Label htmlFor="track-url">
-            {formData.isLocal ? 'File Path *' : 'Streaming URL *'}
-          </Label>
-          <Input
-            id="track-url"
-            value={formData.url}
-            onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-            placeholder={formData.isLocal ? '/path/to/music/file.mp3' : 'https://example.com/music.mp3'}
-            required
-          />
-          <p className="text-xs text-neutral-400 mt-1">
-            {formData.isLocal 
-              ? 'Enter the full path to your local music file'
-              : 'Enter a valid HTTP or HTTPS URL'
-            }
-          </p>
-        </div>
-      </div>
-
-      <div className="flex gap-2 justify-end">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" className="bg-violet-600 hover:bg-violet-700">
-          Add Track
-        </Button>
-      </div>
-    </form>
-  );
-};
-
-/**
- * Music track item component
- */
-const TrackItem = ({ 
-  track, 
-  isPlaying, 
-  onPlay,
-  onSelect,
-  isSelected,
-  onDelete,
-  showDelete = false
-}: { 
-  track: MusicTrack; 
-  isPlaying: boolean;
-  onPlay: () => void;
-  onSelect: () => void;
-  isSelected: boolean;
-  onDelete?: () => void;
-  showDelete?: boolean;
-}) => {
-  return (
-    <div 
-      className={`p-3 rounded-lg cursor-pointer transition-all ${
-        isSelected 
-          ? 'bg-violet-600/20 border border-violet-500' 
-          : 'bg-neutral-800/50 hover:bg-neutral-800'
-      }`}
-      onClick={onSelect}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-semibold text-neutral-200">{track.name}</h4>
-            <span className={`text-xs px-2 py-1 rounded-full ${
-              track.category === 'nature' ? 'bg-green-600/20 text-green-400' :
-              track.category === 'lofi' ? 'bg-purple-600/20 text-purple-400' :
-              track.category === 'ambient' ? 'bg-blue-600/20 text-blue-400' :
-              'bg-orange-600/20 text-orange-400'
-            }`}>
-              {track.category}
-            </span>
-            {track.isLocal && (
-              <span className="text-xs px-2 py-1 rounded-full bg-gray-600/20 text-gray-400">
-                <HiFolder className="inline h-3 w-3 mr-1" />
-                Local
-              </span>
-            )}
-            {track.duration && (
-              <span className="text-xs text-neutral-500">{track.duration}</span>
-            )}
-          </div>
-          <p className="text-sm text-neutral-400">{track.description}</p>
-          <p className="text-xs text-neutral-500 mt-1 break-all">{track.url}</p>
-        </div>
-        <div className="flex items-center gap-2 ml-2">
-          {showDelete && onDelete && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="text-red-400 hover:text-red-300"
-            >
-              <HiTrash className="h-4 w-4" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onPlay();
-            }}
-          >
-            {isPlaying ? <HiPause className="h-4 w-4" /> : <HiPlay className="h-4 w-4" />}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 /**
  * Background music player component props
@@ -241,122 +33,130 @@ interface BackgroundMusicPlayerProps {
 }
 
 /**
- * Background music player dialog component
+ * Simple online-only background music player
  */
-export const BackgroundMusicPlayer = ({ 
-  isPlaying, 
-  onPlayStateChange 
+export const BackgroundMusicPlayer = ({
+  isPlaying,
+  onPlayStateChange,
 }: BackgroundMusicPlayerProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedTrack, setSelectedTrack] = useState<MusicTrack | null>(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [currentTrack, setCurrentTrack] = useState('Code Radio - Focus Music');
   const [isLoading, setIsLoading] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-  
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
   const { settings, updateSetting } = useSettings();
   const musicSettings = settings.musicPlayer;
-  
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Load custom tracks on mount
+  // Code Radio stream URL (FreeCodeCamp's music stream)
+  const STREAM_URL =
+    'https://coderadio-admin-v2.freecodecamp.org/listen/coderadio/radio.mp3';
+  const META_URL = '';
+
+  // Monitor online status
   useEffect(() => {
-    if (musicSettings.customTracks.length > 0) {
-      const result = musicTrackManager.setCustomTracks(musicSettings.customTracks);
-      if (!result.success) {
-        console.warn('Failed to load custom tracks:', result.error);
-      }
-    }
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
-  // Get all available tracks
-  const allTracks = musicTrackManager.getAllTracks();
-
-  // Update music settings
-  const updateMusicSettings = (updates: Partial<MusicPlayerSettings>) => {
-    updateSetting('musicPlayer', { ...musicSettings, ...updates });
-  };
-
-  // Initialize audio element
+  // Fetch current track metadata
   useEffect(() => {
-    if (!audioRef.current) {
+    if (!isOnline) return;
+
+    const fetchTrackInfo = async () => {
+      try {
+        let data: any = null;
+        if (!META_URL) {
+          const response = await fetch(META_URL);
+          data = await response.json();
+        }
+        const trackName = data?.song || 'Code Radio - Lofi Music';
+        setCurrentTrack(trackName);
+      } catch (error) {
+        console.error('Failed to fetch track info:', error);
+        setCurrentTrack('Code Radio - Lofi');
+      }
+    };
+
+    fetchTrackInfo();
+    const interval = setInterval(fetchTrackInfo, 15000); // Update every 15 seconds
+
+    return () => clearInterval(interval);
+  }, [isOnline]);
+
+  // Initialize audio element only when dialog is opened
+  useEffect(() => {
+    if (isOpen && !audioRef.current) {
       audioRef.current = new Audio();
-      audioRef.current.loop = musicSettings.loop;
+      audioRef.current.src = STREAM_URL;
       audioRef.current.volume = musicSettings.volume / 100;
-      
+      audioRef.current.crossOrigin = 'anonymous';
+
       // Event listeners
       audioRef.current.addEventListener('loadstart', () => setIsLoading(true));
       audioRef.current.addEventListener('canplay', () => setIsLoading(false));
-      audioRef.current.addEventListener('timeupdate', () => {
-        if (audioRef.current) {
-          setCurrentTime(audioRef.current.currentTime);
-        }
-      });
-      audioRef.current.addEventListener('loadedmetadata', () => {
-        if (audioRef.current) {
-          setDuration(audioRef.current.duration);
-        }
-      });
-      audioRef.current.addEventListener('ended', () => {
-        if (!musicSettings.loop) {
-          onPlayStateChange(false);
-        }
-      });
+      audioRef.current.addEventListener('playing', () => setIsLoading(false));
       audioRef.current.addEventListener('error', (e) => {
         console.error('Audio error:', e);
-        toast.error('Failed to load audio track - please check the URL or file path');
+        toast.error('Failed to load audio stream');
         setIsLoading(false);
         onPlayStateChange(false);
       });
     }
-    
+
     return () => {
-      if (audioRef.current) {
+      if (audioRef.current && !isOpen) {
         audioRef.current.pause();
         audioRef.current = null;
       }
     };
-  }, []);
+  }, [isOpen]);
 
-  // Update audio settings
+  // Update volume when settings change
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = musicSettings.volume / 100;
-      audioRef.current.loop = musicSettings.loop;
     }
-  }, [musicSettings]);
+  }, [musicSettings.volume]);
 
-  // Play/pause control with validation
   const togglePlayPause = async () => {
-    if (!selectedTrack) {
-      toast.error('Please select a track first');
+    if (!isOnline) {
+      toast.error(
+        'You are offline. Please connect to the internet to play music.'
+      );
       return;
     }
 
     if (!audioRef.current) return;
 
-    // Validate track access before playing
-    const accessCheck = await musicTrackManager.validateTrackAccess(selectedTrack);
-    if (!accessCheck.accessible) {
-      toast.error(`Cannot access track: ${accessCheck.error}`);
-      return;
-    }
-
     if (isPlaying) {
       audioRef.current.pause();
       onPlayStateChange(false);
+      toast.success('Music paused');
     } else {
-      if (audioRef.current.src !== selectedTrack.url) {
-        audioRef.current.src = selectedTrack.url;
-      }
-      audioRef.current.play().then(() => {
+      setIsLoading(true);
+      try {
+        // Reset the audio source for fresh stream
+        audioRef.current.load();
+        await audioRef.current.play();
         onPlayStateChange(true);
-        toast.success(`Playing: ${selectedTrack.name}`);
-      }).catch((error) => {
+        toast.success(`Playing: ${currentTrack}`);
+      } catch (error) {
         console.error('Playback error:', error);
-        toast.error('Failed to play audio - check if the file exists or URL is accessible');
+        toast.error('Failed to play audio stream');
         onPlayStateChange(false);
-      });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -365,57 +165,17 @@ export const BackgroundMusicPlayer = ({
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       onPlayStateChange(false);
-      setCurrentTime(0);
+      toast.success('Music stopped');
     }
   };
 
-  const selectTrack = (track: MusicTrack) => {
-    if (isPlaying && audioRef.current) {
-      audioRef.current.pause();
-      onPlayStateChange(false);
-    }
-    setSelectedTrack(track);
+  const updateVolume = (volume: number) => {
+    updateSetting('musicPlayer', { ...musicSettings, volume });
   };
 
-  // Add custom track handler
-  const handleAddCustomTrack = (trackData: Partial<MusicTrack>) => {
-    const result = musicTrackManager.addCustomTrack(trackData);
-    if (result.success && result.track) {
-      // Update settings with new custom tracks
-      const newCustomTracks = musicTrackManager.getCustomTracks();
-      updateMusicSettings({ customTracks: newCustomTracks });
-      setShowAddForm(false);
-    } else {
-      toast.error(result.error || 'Failed to add track');
-    }
+  const updateNotifications = (enabled: boolean) => {
+    updateSetting('musicPlayer', { ...musicSettings, autoplay: enabled });
   };
-
-  // Delete custom track handler  
-  const handleDeleteCustomTrack = (trackId: string) => {
-    if (musicTrackManager.removeCustomTrack(trackId)) {
-      const newCustomTracks = musicTrackManager.getCustomTracks();
-      updateMusicSettings({ customTracks: newCustomTracks });
-      
-      // If deleted track was selected, clear selection
-      if (selectedTrack?.id === trackId) {
-        if (isPlaying) {
-          stopMusic();
-        }
-        setSelectedTrack(null);
-      }
-    }
-  };
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const categoryTracks = (category: string) => 
-    allTracks.filter(track => track.category === category);
-
-  const customTracks = musicTrackManager.getCustomTracks();
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -423,276 +183,189 @@ export const BackgroundMusicPlayer = ({
         <Button
           variant="ghost"
           size="icon"
-          className={`rounded-full transition ${
+          className={`rounded-full transition relative ${
             isPlaying ? 'text-green-500' : 'text-neutral-400'
           } hover:bg-zinc-800`}
           title="Background Music"
-          aria-label="Open background music player"
-        >
+          aria-label="Open background music player">
           <HiMusicNote className="text-xl" />
+          {!isOnline && (
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
+          )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] bg-neutral-900 border-neutral-700">
+      <DialogContent className="max-w-2xl max-h-[90vh] bg-neutral-900 border-neutral-700">
         <DialogHeader>
           <DialogTitle className="text-neutral-200 text-xl font-semibold flex items-center gap-2">
             <HiMusicNote className="text-violet-400" />
             Background Music Player
+            {!isOnline && (
+              <span className="text-red-400 text-sm font-normal flex items-center gap-1">
+                <HiExclamationCircle className="h-4 w-4" />
+                Offline
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
-        
-        <div className="space-y-6">
-          {/* Current Track & Controls */}
-          <div className="p-4 bg-neutral-800/50 rounded-lg">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-semibold text-neutral-200">
-                  {selectedTrack ? selectedTrack.name : 'No track selected'}
-                </h3>
-                {selectedTrack && (
-                  <p className="text-sm text-neutral-400">{selectedTrack.description}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={stopMusic}
-                  disabled={!isPlaying}
-                >
-                  <HiStop className="h-4 w-4" />
-                </Button>
-                <Button
-                  onClick={togglePlayPause}
-                  disabled={!selectedTrack || isLoading}
-                  className="bg-violet-600 hover:bg-violet-700"
-                >
-                  {isLoading ? (
-                    <HiRefresh className="h-4 w-4 animate-spin" />
-                  ) : isPlaying ? (
-                    <HiPause className="h-4 w-4" />
-                  ) : (
-                    <HiPlay className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            
-            {/* Progress Bar */}
-            {selectedTrack && duration > 0 && (
-              <div className="space-y-2">
-                <Slider
-                  value={[currentTime]}
-                  max={duration}
-                  step={1}
-                  className="w-full"
-                  onValueChange={([value]) => {
-                    if (audioRef.current) {
-                      audioRef.current.currentTime = value;
-                      setCurrentTime(value);
-                    }
-                  }}
-                />
-                <div className="flex justify-between text-xs text-neutral-400">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(duration)}</span>
+
+        <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+          <div className="space-y-6">
+            {/* Offline Notice */}
+            {!isOnline && (
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                <div className="flex items-center gap-3 text-red-400">
+                  <HiWifi className="h-6 w-6" />
+                  <div>
+                    <p className="font-semibold">You are currently offline</p>
+                    <p className="text-sm text-red-300">
+                      Music streaming requires an internet connection. Offline
+                      music support is coming soon!
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Settings */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-neutral-800/30 rounded-lg">
-            <div className="space-y-2">
-              <Label className="text-neutral-200 flex items-center gap-2">
-                <HiVolumeUp className="h-4 w-4" />
-                Volume
-              </Label>
-              <Slider
-                value={[musicSettings.volume]}
-                max={100}
-                step={1}
-                onValueChange={([value]) => updateMusicSettings({ volume: value })}
-              />
-              <span className="text-xs text-neutral-400">{musicSettings.volume}%</span>
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-neutral-200">Auto-play</Label>
-              <Switch
-                checked={musicSettings.autoplay}
-                onCheckedChange={(checked) => updateMusicSettings({ autoplay: checked })}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-neutral-200">Loop</Label>
-              <Switch
-                checked={musicSettings.loop}
-                onCheckedChange={(checked) => updateMusicSettings({ loop: checked })}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-neutral-200">Fade In/Out</Label>
-              <Switch
-                checked={musicSettings.fadeInOut}
-                onCheckedChange={(checked) => updateMusicSettings({ fadeInOut: checked })}
-              />
-            </div>
-          </div>
-
-          {/* Music Source Configuration */}
-          <div className="p-4 bg-neutral-800/30 rounded-lg space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-neutral-200">Music Sources</h3>
-              <Button
-                onClick={() => setShowAddForm(!showAddForm)}
-                size="sm"
-                className="bg-violet-600 hover:bg-violet-700"
-              >
-                <HiPlus className="h-4 w-4 mr-2" />
-                Add Custom Track
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <div className="space-y-2">
-                <Label className="text-neutral-200">Music Source</Label>
-                <select
-                  value={musicSettings.musicSource}
-                  onChange={(e) => updateMusicSettings({ 
-                    musicSource: e.target.value as 'streaming' | 'local' | 'both' 
-                  })}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="streaming">Streaming Only</option>
-                  <option value="local">Local Files Only</option>
-                  <option value="both">Both</option>
-                </select>
+            {/* Current Track & Controls */}
+            <div className="p-6 bg-gradient-to-r from-neutral-800/60 to-neutral-800/40 rounded-xl border border-neutral-700/50">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-neutral-200 mb-1 truncate">
+                    {currentTrack}
+                  </h3>
+                  <p className="text-sm text-neutral-400">
+                    {isOnline
+                      ? '🎵 Chill Lofi - Enjoy!'
+                      : '📡 Waiting for connection...'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={stopMusic}
+                    disabled={!isPlaying || !isOnline}
+                    className="h-11 px-4">
+                    <HiStop className="h-4 w-4 mr-2" />
+                    Stop
+                  </Button>
+                  <Button
+                    onClick={togglePlayPause}
+                    disabled={isLoading || !isOnline}
+                    className="bg-violet-600 hover:bg-violet-700 disabled:bg-neutral-700 h-11 px-6">
+                    {isLoading ? (
+                      <HiRefresh className="h-5 w-5 animate-spin" />
+                    ) : isPlaying ? (
+                      <>
+                        <HiPause className="h-5 w-5 mr-2" />
+                        Pause
+                      </>
+                    ) : (
+                      <>
+                        <HiPlay className="h-5 w-5 mr-2" />
+                        Play
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-              
-              {(musicSettings.musicSource === 'local' || musicSettings.musicSource === 'both') && (
-                <div className="col-span-2 space-y-2">
-                  <Label className="text-neutral-200">Local Music Directory</Label>
-                  <Input
-                    value={musicSettings.localMusicDirectory || ''}
-                    onChange={(e) => updateMusicSettings({ localMusicDirectory: e.target.value })}
-                    placeholder="/path/to/your/music/folder"
-                  />
+
+              {/* Live Stream Indicator */}
+              {isOnline && (
+                <div className="flex items-center gap-2 text-sm text-neutral-400">
+                  <div className="flex items-center gap-1">
+                    <div
+                      className={`h-2 w-2 rounded-full ${
+                        isPlaying
+                          ? 'bg-red-500 animate-pulse'
+                          : 'bg-neutral-500'
+                      }`}></div>
+                    <span>{isPlaying ? 'LIVE' : 'READY'}</span>
+                  </div>
+                  <span>•</span>
+                  <span>Streaming Quality: 128kbps</span>
                 </div>
               )}
             </div>
 
-            {showAddForm && (
-              <AddCustomTrackForm
-                onAdd={handleAddCustomTrack}
-                onCancel={() => setShowAddForm(false)}
-              />
-            )}
+            {/* Settings */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
+              <div className="space-y-3">
+                <Label className="text-neutral-200 flex items-center gap-2 font-medium">
+                  <HiVolumeUp className="h-4 w-4" />
+                  Volume
+                </Label>
+                <Slider
+                  value={[musicSettings.volume]}
+                  max={100}
+                  step={1}
+                  onValueChange={([value]) => updateVolume(value)}
+                  disabled={!isOnline}
+                />
+                <span className="text-sm text-neutral-400 font-mono">
+                  {musicSettings.volume}%
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-neutral-200 font-medium">
+                  Notifications
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={musicSettings.autoplay}
+                    onCheckedChange={updateNotifications}
+                  />
+                  <span className="text-sm text-neutral-400">
+                    {musicSettings.autoplay ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500">
+                  Show notifications when tracks change
+                </p>
+              </div>
+            </div>
+
+            {/* Coming Soon Notice */}
+            <div className="p-4 bg-violet-500/10 border border-violet-500/30 rounded-xl">
+              <div className="flex items-center gap-3 text-violet-400">
+                <HiMusicNote className="h-5 w-5" />
+                <div>
+                  <p className="font-semibold text-sm">🚀 Coming Soon</p>
+                  <p className="text-xs text-violet-300">
+                    Local music files, custom playlists, nature sounds, and
+                    offline support
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Usage Tips */}
+            <div className="p-4 bg-neutral-800/20 rounded-xl border border-neutral-700/30">
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                💡 <strong className="text-neutral-300">Tips:</strong> This
+                player streams live lofi music from{' '}
+                <a
+                  href="https://coderadio.freecodecamp.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-violet-400 hover:text-violet-300 underline font-medium">
+                  Code Radio
+                </a>
+                . Perfect for hyper focus sessions! Use the volume slider to
+                adjust volume. Internet connection required. Music courtesy of{' '}
+                <a
+                  href="https://www.freecodecamp.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-violet-400 hover:text-violet-300 underline font-medium">
+                  freeCodeCamp
+                </a>
+                .
+              </p>
+            </div>
           </div>
-
-          {/* Track Categories */}
-          <div className="space-y-4">
-            {/* Custom Tracks */}
-            {customTracks.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-200 mb-3 flex items-center gap-2">
-                  🎵 Custom Tracks
-                  <span className="text-sm text-neutral-400">({customTracks.length})</span>
-                </h3>
-                <div className="space-y-2">
-                  {customTracks.map((track) => (
-                    <TrackItem
-                      key={track.id}
-                      track={track}
-                      isPlaying={isPlaying && selectedTrack?.id === track.id}
-                      onPlay={togglePlayPause}
-                      onSelect={() => selectTrack(track)}
-                      isSelected={selectedTrack?.id === track.id}
-                      onDelete={() => handleDeleteCustomTrack(track.id)}
-                      showDelete={true}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Nature Sounds */}
-            {(musicSettings.musicSource === 'streaming' || musicSettings.musicSource === 'both') && categoryTracks('nature').length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-200 mb-3 flex items-center gap-2">
-                  🌿 Nature Sounds
-                  <span className="text-sm text-neutral-400">({categoryTracks('nature').length})</span>
-                </h3>
-                <div className="space-y-2">
-                  {categoryTracks('nature').map((track) => (
-                    <TrackItem
-                      key={track.id}
-                      track={track}
-                      isPlaying={isPlaying && selectedTrack?.id === track.id}
-                      onPlay={togglePlayPause}
-                      onSelect={() => selectTrack(track)}
-                      isSelected={selectedTrack?.id === track.id}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Lofi Music */}
-            {(musicSettings.musicSource === 'streaming' || musicSettings.musicSource === 'both') && categoryTracks('lofi').length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-200 mb-3 flex items-center gap-2">
-                  🎵 Lofi Music
-                  <span className="text-sm text-neutral-400">({categoryTracks('lofi').length})</span>
-                </h3>
-                <div className="space-y-2">
-                  {categoryTracks('lofi').map((track) => (
-                    <TrackItem
-                      key={track.id}
-                      track={track}
-                      isPlaying={isPlaying && selectedTrack?.id === track.id}
-                      onPlay={togglePlayPause}
-                      onSelect={() => selectTrack(track)}
-                      isSelected={selectedTrack?.id === track.id}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Ambient */}
-            {(musicSettings.musicSource === 'streaming' || musicSettings.musicSource === 'both') && categoryTracks('ambient').length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-200 mb-3 flex items-center gap-2">
-                  🌌 Ambient
-                  <span className="text-sm text-neutral-400">({categoryTracks('ambient').length})</span>
-                </h3>
-                <div className="space-y-2">
-                  {categoryTracks('ambient').map((track) => (
-                    <TrackItem
-                      key={track.id}
-                      track={track}
-                      isPlaying={isPlaying && selectedTrack?.id === track.id}
-                      onPlay={togglePlayPause}
-                      onSelect={() => selectTrack(track)}
-                      isSelected={selectedTrack?.id === track.id}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* No tracks message */}
-            {allTracks.length === 0 && (
-              <div className="text-center py-8 text-neutral-400">
-                <HiMusicNote className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No music tracks available</p>
-                <p className="text-sm">Add custom tracks to get started</p>
-              </div>
-            )}
-          </div>
-        </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

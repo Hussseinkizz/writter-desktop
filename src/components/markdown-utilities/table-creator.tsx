@@ -26,14 +26,6 @@ import { toast } from 'sonner';
 type TableAlignment = 'left' | 'center' | 'right';
 
 /**
- * Table cell data structure
- */
-interface TableCell {
-  content: string;
-  alignment: TableAlignment;
-}
-
-/**
  * Table configuration
  */
 interface TableConfig {
@@ -236,14 +228,15 @@ export const TableCreator = ({ onInsert }: TableCreatorProps) => {
           <HiTable className="text-xl" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-5xl max-h-[95vh] bg-neutral-900 border-neutral-700">
+      <DialogContent className="max-w-5xl max-h-[90vh] bg-neutral-900 border-neutral-700">
         <DialogHeader>
           <DialogTitle className="text-neutral-200 text-xl font-semibold">
             Table Creator
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="max-h-[60vh] overflow-y-auto">
+          <div className="space-y-6">
           {/* Table Configuration */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-neutral-800/50 rounded-lg">
             <div className="space-y-2">
@@ -404,6 +397,7 @@ export const TableCreator = ({ onInsert }: TableCreatorProps) => {
               Insert Table
             </Button>
           </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>

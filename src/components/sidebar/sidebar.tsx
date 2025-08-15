@@ -19,6 +19,8 @@ interface Props {
   onSync: () => void;
   changeFolder: () => void;
   openSettings: () => void;
+  onCreateFileInFolder?: (folderPath: string) => void;
+  onCreateFolderInFolder?: (folderPath: string) => void;
 }
 
 /**
@@ -39,6 +41,8 @@ export const Sidebar = ({
   onSync,
   changeFolder,
   openSettings,
+  onCreateFileInFolder,
+  onCreateFolderInFolder,
 }: Props) => {
   const [search, setSearch] = useState('');
 
@@ -59,7 +63,7 @@ export const Sidebar = ({
         onSync={onSync}
       />
       <SidebarSearch onChange={setSearch} />
-      <div className="flex-1 overflow-auto px-4 py-2">
+      <div className="flex-1 --flex --items-start overflow-auto px-4 py-2">
         <FileTree
           tree={filteredTree}
           selectedPath={selectedPath}
@@ -67,6 +71,8 @@ export const Sidebar = ({
           onRename={onRename}
           onDelete={onDelete}
           onMove={onMove}
+          onCreateFileInFolder={onCreateFileInFolder}
+          onCreateFolderInFolder={onCreateFolderInFolder}
           unsavedPaths={unsavedPaths}
         />
       </div>

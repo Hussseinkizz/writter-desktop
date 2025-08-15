@@ -1,11 +1,11 @@
 {
   "name": "writter",
-  "description": "An editor for technical writting, blogging and note taking using markdown",
+  "description": "The minimal editor for documenting, note taking and micro blogging using markdown.",
   "repository": "https://github.com/Hussseinkizz/writter-desktop",
   "author": "Hussein Kizz",
   "license": "MIT",
   "private": true,
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "scripts": {
     "dev": "vite",

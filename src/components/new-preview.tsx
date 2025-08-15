@@ -1,7 +1,7 @@
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkBreaks from "remark-breaks";
-import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type PreviewProps = {
   markdown: string;
@@ -14,15 +14,15 @@ type PreviewProps = {
  */
 export const Preview = (props: PreviewProps) => {
   return (
-    <motion.div 
+    <motion.div
       className="h-[90vh] w-full overflow-y-auto bg-background p-6"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-    >
-      <div className="prose prose-invert prose-slate max-w-none 
+      transition={{ duration: 0.2, ease: 'easeOut' }}>
+      <div
+        className="prose prose-invert prose-slate max-w-none 
                       prose-headings:text-white prose-p:text-gray-200 
-                      prose-a:text-blue-400 prose-strong:text-white
+                      prose-a:text-violet-500 prose-strong:text-white
                       prose-code:text-pink-400 prose-code:bg-gray-800 
                       prose-code:px-1 prose-code:py-0.5 prose-code:rounded
                       prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700
@@ -35,8 +35,7 @@ export const Preview = (props: PreviewProps) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-          >
+            transition={{ duration: 0.15, ease: 'easeOut' }}>
             <ReactMarkdown remarkPlugins={[remarkBreaks, remarkGfm]}>
               {props.markdown}
             </ReactMarkdown>

@@ -126,3 +126,24 @@ export async function createFile(path: string, content = '', projectDir?: string
   
   await invoke('create_file', { path, content: processedContent });
 }
+
+/**
+ * Creates a new folder at the specified path.
+ */
+export async function createFolder(path: string): Promise<void> {
+  await invoke('create_folder', { path });
+}
+
+/**
+ * Reads the contents of a directory and returns the entries.
+ */
+export async function readDirectory(path: string): Promise<DirectoryEntry[]> {
+  return await invoke<DirectoryEntry[]>('read_directory', { path });
+}
+
+export interface DirectoryEntry {
+  name: string;
+  path: string;
+  is_dir: boolean;
+  size?: number;
+}

@@ -14,6 +14,8 @@ interface Props {
   onRename: (path: string, newName: string) => void;
   onDelete: (path: string) => void;
   onMove: (fromPath: string, toFolderPath: string) => void;
+  onCreateFileInFolder?: (folderPath: string) => void;
+  onCreateFolderInFolder?: (folderPath: string) => void;
 }
 
 /**
@@ -28,6 +30,8 @@ export const FileTree = ({
   onRename,
   onDelete,
   onMove,
+  onCreateFileInFolder,
+  onCreateFolderInFolder,
 }: Props) => {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const [renamingPath, setRenamingPath] = useState<string | null>(null);
@@ -63,7 +67,7 @@ export const FileTree = ({
     let result: FileNode[] = [];
     for (const node of nodes) {
       result.push(node);
-      if (node.isDir && node.children && (openFolders[node.path] ?? true)) {
+      if (node.isDir && node.children && (openFolders[node.path] ?? false)) {
         result = result.concat(flattenTree(node.children));
       }
     }
@@ -73,13 +77,12 @@ export const FileTree = ({
   const flattenedItems = flattenTree(tree);
 
   return (
-    <>
-      <motion.div 
-        className="flex w-full flex-col gap-2 items-start justify-start"
+    <div className="flex w-full flex-col gap-1 items-start justify-start">
+      <motion.div
+        className="flex w-full flex-col gap-1 items-start justify-start"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-      >
+        transition={{ duration: 0.2, ease: 'easeOut' }}>
         {flattenedItems.map((node, index) => (
           <FileTreeItem
             key={node.path}
@@ -93,6 +96,8 @@ export const FileTree = ({
             startRename={startRename}
             setConfirmingDeletePath={setConfirmingDeletePath}
             setMovingFilePath={setMovingFilePath}
+            onCreateFileInFolder={onCreateFileInFolder}
+            onCreateFolderInFolder={onCreateFolderInFolder}
             index={index}
           />
         ))}
@@ -105,7 +110,7 @@ export const FileTree = ({
         getDisplayPath={getDisplayPath}
         onDelete={onDelete}
       />
-      
+
       {/* Move File Modal */}
       <MoveFileDialog
         movingFilePath={movingFilePath}
@@ -114,7 +119,7 @@ export const FileTree = ({
         onMove={onMove}
         getDisplayPath={getDisplayPath}
       />
-      
+
       {/* Rename Modal */}
       <RenameDialog
         renamingPath={renamingPath}
@@ -124,6 +129,6 @@ export const FileTree = ({
         setRenameValue={setRenameValue}
         confirmRename={confirmRename}
       />
-    </>
+    </div>
   );
 };

@@ -1,12 +1,16 @@
 import {
-  HiBell,
   HiFolder,
-  HiCog,
   HiCheck,
-  HiPlay,
-  HiStop,
   HiEye,
   HiEyeOff,
+  HiMusicNote,
+  HiTemplate,
+  HiPlus,
+  HiTable,
+  HiCode,
+  HiClipboardList,
+  HiMenu,
+  HiInformationCircle,
 } from 'react-icons/hi';
 import { useState } from 'react';
 import { format } from 'date-fns-tz';
@@ -14,23 +18,25 @@ import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { 
-  MarkdownCheatSheet, 
-  SnippetSystem, 
-  TableCreator, 
-  QuickFormatting 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import {
+  MarkdownCheatSheet,
+  SnippetSystem,
+  TableCreator,
+  QuickFormatting,
 } from './markdown-utilities';
-import { 
-  BackgroundMusicPlayer, 
-  SimpleTodoManager 
-} from './enhanced-features';
+import { BackgroundMusicPlayer, SimpleTodoManager } from './enhanced-features';
+import { AboutDialog } from './about-dialog';
 
 type HeaderProps = {
   projectName: string;
   currentFile: string;
-  openSettings: () => void;
-  playMusic: () => void;
-  musicPlaying: boolean;
   showPreview: boolean;
   onAutoSave: (v: boolean) => void;
   selectedPath: boolean;
@@ -39,14 +45,12 @@ type HeaderProps = {
   autoSave: boolean;
   onInsertContent: (content: string) => void;
   onMusicStateChange: (playing: boolean) => void;
+  musicPlaying: boolean;
 };
 
 export function AppHeader({
   projectName,
   currentFile,
-  openSettings,
-  playMusic,
-  musicPlaying,
   showPreview,
   togglePreview,
   saveFile,
@@ -55,6 +59,7 @@ export function AppHeader({
   autoSave,
   onInsertContent,
   onMusicStateChange,
+  musicPlaying,
 }: HeaderProps) {
   const [saving, setSaving] = useState(false);
 
@@ -67,6 +72,10 @@ export function AppHeader({
     setSaving(true);
     saveFile();
     setSaving(false);
+  };
+
+  const handleComingSoon = (feature: string) => {
+    toast(`${feature} coming soon! 🚀`);
   };
 
   return (
@@ -85,61 +94,10 @@ export function AppHeader({
         <span className="text-xs text-neutral-400">{formattedTime}</span>
       </div>
 
-      {/* Right: Buttons */}
-      <div className="flex items-center gap-2">
-        {/* Markdown Utilities */}
-        <div className="flex items-center gap-1 mr-2">
-          <MarkdownCheatSheet />
-          <SnippetSystem onInsert={onInsertContent} />
-          <TableCreator onInsert={onInsertContent} />
-          <QuickFormatting onInsert={onInsertContent} />
-        </div>
-        
-        {/* Toggle Preview */}
-        <Button
-          title={showPreview ? 'Hide preview' : 'Show preview'}
-          variant="ghost"
-          size="icon"
-          onClick={togglePreview}
-          className="rounded-full text-neutral-300 hover:bg-zinc-800 transition"
-          aria-label={showPreview ? 'Hide preview' : 'Show preview'}>
-          {showPreview ? (
-            <HiEyeOff className="text-xl" />
-          ) : (
-            <HiEye className="text-xl" />
-          )}
-        </Button>
-        {/* Play Music */}
-        <BackgroundMusicPlayer 
-          isPlaying={musicPlaying}
-          onPlayStateChange={onMusicStateChange}
-        />
-        
-        {/* Todo Manager */}
-        <SimpleTodoManager />
-        
-        {/* Settings */}
-        <Button
-          title="Open settings"
-          variant="ghost"
-          size="icon"
-          onClick={openSettings}
-          className="rounded-full hover:bg-zinc-800 transition"
-          aria-label="Settings">
-          <HiCog className="text-xl text-neutral-300" />
-        </Button>
-        {/* Notification */}
-        <Button
-          title="Notifications"
-          variant="ghost"
-          size="icon"
-          className="relative rounded-full hover:bg-zinc-800 transition"
-          aria-label="Notifications">
-          <HiBell className="text-xl text-neutral-300" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-violet-500 animate-pulse"></span>
-        </Button>
+      {/* Right: Auto Save, Save Button, and Utilities Menu */}
+      <div className="flex items-center gap-3">
         {/* Auto Save Toggle */}
-        <div className="flex items-center gap-2 mr-3">
+        <div className="flex items-center gap-2">
           <Switch
             checked={autoSave}
             onCheckedChange={(v: boolean) => {
@@ -152,7 +110,8 @@ export function AppHeader({
             Auto Save
           </label>
         </div>
-        {/* Save Note */}
+
+        {/* Save Button */}
         <Button
           size="sm"
           onClick={handleSave}
@@ -172,6 +131,166 @@ export function AppHeader({
             </>
           )}
         </Button>
+
+        {/* Utilities Dropdown Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <button
+              className="rounded-full text-neutral-300 hover:bg-zinc-800 transition p-2 flex items-center justify-center"
+              title="Tools & Utilities"
+              aria-label="Open tools menu">
+              <HiMenu className="text-xl" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-56 bg-neutral-900 border-neutral-700"
+            align="end"
+            sideOffset={5}>
+            {/* View Options */}
+            <DropdownMenuItem
+              onClick={togglePreview}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              {showPreview ? (
+                <>
+                  <HiEyeOff className="h-4 w-4 text-neutral-400" />
+                  <span>Hide Preview</span>
+                </>
+              ) : (
+                <>
+                  <HiEye className="h-4 w-4 text-neutral-400" />
+                  <span>Show Preview</span>
+                </>
+              )}
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="bg-neutral-700" />
+
+            {/* Markdown Tools */}
+            <DropdownMenuItem
+              onClick={() => {
+                // Find and click the hidden dialog trigger
+                const trigger = document.querySelector('[data-dialog="cheat-sheet"] button') as HTMLButtonElement;
+                trigger?.click();
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <HiCode className="h-4 w-4 text-neutral-400" />
+              <span>Markdown Cheat Sheet</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                const trigger = document.querySelector('[data-dialog="snippets"] button') as HTMLButtonElement;
+                trigger?.click();
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <HiTemplate className="h-4 w-4 text-neutral-400" />
+              <span>Code Snippets</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                const trigger = document.querySelector('[data-dialog="table"] button') as HTMLButtonElement;
+                trigger?.click();
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <HiTable className="h-4 w-4 text-neutral-400" />
+              <span>Table Creator</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                const trigger = document.querySelector('[data-dialog="formatting"] button') as HTMLButtonElement;
+                trigger?.click();
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <HiPlus className="h-4 w-4 text-neutral-400" />
+              <span>Quick Formatting</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="bg-neutral-700" />
+
+            {/* Enhanced Features */}
+            <DropdownMenuItem
+              onClick={() => {
+                const trigger = document.querySelector('[data-dialog="music"] button') as HTMLButtonElement;
+                trigger?.click();
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <HiMusicNote className="h-4 w-4 text-violet-400" />
+              <span>Background Music</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                const trigger = document.querySelector('[data-dialog="todo"] button') as HTMLButtonElement;
+                trigger?.click();
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <HiClipboardList className="h-4 w-4 text-neutral-400" />
+              <span>Todo Manager</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="bg-neutral-700" />
+
+            {/* About */}
+            <DropdownMenuItem
+              onClick={() => {
+                const trigger = document.querySelector('[data-dialog="about"] button') as HTMLButtonElement;
+                trigger?.click();
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <HiInformationCircle className="h-4 w-4 text-blue-400" />
+              <span>About</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="bg-neutral-700" />
+
+            {/* Coming Soon Items */}
+            <DropdownMenuItem
+              onClick={() => handleComingSoon('Settings')}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <span className="h-4 w-4 text-neutral-500">⚙️</span>
+              <span className="text-neutral-500">Settings</span>
+              <span className="ml-auto text-xs text-neutral-500">Soon</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => handleComingSoon('Notifications')}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <span className="h-4 w-4 text-neutral-500">🔔</span>
+              <span className="text-neutral-500">Notifications</span>
+              <span className="ml-auto text-xs text-neutral-500">Soon</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Hidden Dialog Components */}
+      <div style={{ display: 'none' }}>
+        <div data-dialog="cheat-sheet">
+          <MarkdownCheatSheet />
+        </div>
+        <div data-dialog="snippets">
+          <SnippetSystem onInsert={onInsertContent} />
+        </div>
+        <div data-dialog="table">
+          <TableCreator onInsert={onInsertContent} />
+        </div>
+        <div data-dialog="formatting">
+          <QuickFormatting onInsert={onInsertContent} />
+        </div>
+        <div data-dialog="music">
+          <BackgroundMusicPlayer
+            isPlaying={musicPlaying}
+            onPlayStateChange={onMusicStateChange}
+          />
+        </div>
+        <div data-dialog="todo">
+          <SimpleTodoManager />
+        </div>
+        <div data-dialog="about">
+          <AboutDialog />
+        </div>
       </div>
     </header>
   );
