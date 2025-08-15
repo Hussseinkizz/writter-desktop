@@ -1,11 +1,6 @@
 import {
-  HiBell,
-  HiCheckCircle,
   HiClock,
-  HiLightBulb,
-  HiLightningBolt,
   HiPencil,
-  HiRefresh,
 } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
 
@@ -61,23 +56,29 @@ export const AppFooter = ({ wordCount }: FooterProps) => {
       {/* The Buttons */}
       <div
         className="flex items-center justify-end gap-4"
-        title="Spelling Checks">
+        title="Footer Stats">
+        {/* TODO: Uncomment when grammar functionality is ready
         <div className="flex items-center gap-1 cursor-pointer">
           <HiCheckCircle className="text-base" />
           <span className="flex">Grammar</span>
         </div>
+        */}
+        {/* TODO: Uncomment when file size functionality is ready
         <div
           className="flex items-center gap-1 cursor-pointer"
           title="Current File Size">
           <HiLightningBolt className="text-base" />
           <span className="flex">0 bytes</span>
         </div>
+        */}
+        {/* TODO: Uncomment when smart mode functionality is ready
         <div
           className="flex items-center gap-1 cursor-pointer"
           title="AI Suggestions">
           <HiLightBulb className="text-base" />
           <span className="flex">smart mode</span>
         </div>
+        */}
         <div
           className="flex items-center gap-1 cursor-pointer"
           title="Word Count">

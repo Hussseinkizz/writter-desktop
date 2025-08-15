@@ -7,10 +7,13 @@ import { Editor } from '@/components/new-editor';
 import { Preview } from '@/components/new-preview';
 import { Sidebar } from '@/components/sidebar/sidebar';
 import { CreateFileDialog } from '@/components/sidebar/create-file-dialog';
+import { CreateFolderDialog } from '@/components/sidebar/create-folder-dialog';
+import { SettingsDialog } from '@/components/settings/settings-dialog';
+import { NotificationsDialog, Notification } from '@/components/notifications-dialog';
 import { buildFileTree, FileNode } from '@/utils/build-tree';
-import { BaseDirectory } from '@tauri-apps/plugin-fs';
 import { toast } from 'sonner';
 import { open } from '@tauri-apps/plugin-dialog';
+import { listen } from '@tauri-apps/api/event';
 import {
   getFileContent,
   saveToFile,
@@ -18,9 +21,12 @@ import {
   renameFile,
   moveFile,
   createFile,
+  createFolder,
 } from '@/utils/file-handlers';
 import { useSettings } from '@/hooks/use-settings';
 import { LoadingScreen } from './components/loading-screen';
+import { pluginManager } from '@/plugins/plugin-manager';
+import { builtInPlugins } from '@/plugins/built-in-plugins';
 
 function countWords(text: string): number {
   return text.trim().replace(/\s+/g, ' ').split(' ').filter(Boolean).length;
@@ -39,20 +45,45 @@ function App() {
   const [fileTree, setFileTree] = useState<FileNode[]>([]);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [unsavedPaths, setUnsavedPaths] = useState<string[]>([]);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(true);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [projectName, setProjectName] = useState<string>('Unknown');
   const [currentFile, setCurrentFile] = useState<string>('Unknown');
+  const [musicPlaying, setMusicPlaying] = useState<boolean>(false);
 
   const [createFileOpen, setCreateFileOpen] = useState(false);
   const [newFileName, setNewFileName] = useState('');
   const [createFileError, setCreateFileError] = useState<string | undefined>(
     undefined
   );
+  const [createFileParentPath, setCreateFileParentPath] = useState<string | null>(null);
+
+  const [createFolderOpen, setCreateFolderOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [createFolderError, setCreateFolderError] = useState<string | undefined>(
+    undefined
+  );
+  const [createFolderParentPath, setCreateFolderParentPath] = useState<string | null>(null);
 
   const [wordCount, setWordCount] = useState(
     selectedPath ? countWords(markdown) : 0
   );
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize plugin system
+  useEffect(() => {
+    // Register built-in plugins
+    builtInPlugins.forEach((plugin) => {
+      pluginManager.registerPlugin(plugin);
+    });
+
+    // Load plugin configuration from localStorage
+    pluginManager.loadPluginConfig();
+
+    // Cleanup on unmount
+    return () => {
+      pluginManager.savePluginConfig();
+    };
+  }, []);
 
   const handleSaveFile = useCallback(async () => {
     if (!selectedPath) {
@@ -60,13 +91,13 @@ function App() {
       return;
     }
     try {
-      await saveToFile(selectedPath, markdown);
+      await saveToFile(selectedPath, markdown, projectDir || undefined);
       setUnsavedPaths((prev) => prev.filter((p) => p !== selectedPath));
       toast('File saved!');
     } catch {
       toast('Failed to save file!');
     }
-  }, [selectedPath, markdown]);
+  }, [selectedPath, markdown, projectDir]);
 
   const handleChange = useCallback(
     (val: string) => {
@@ -78,7 +109,7 @@ function App() {
       if (autoSave && selectedPath) {
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
         debounceTimer.current = setTimeout(() => {
-          saveToFile(selectedPath, val)
+          saveToFile(selectedPath, val, projectDir || undefined)
             .then(() =>
               setUnsavedPaths((prev) => prev.filter((p) => p !== selectedPath))
             )
@@ -86,7 +117,7 @@ function App() {
         }, 1000);
       }
     },
-    [autoSave, selectedPath, unsavedPaths]
+    [autoSave, selectedPath, unsavedPaths, projectDir]
   );
 
   useEffect(() => {
@@ -98,7 +129,7 @@ function App() {
   const handleProjectChosen = async (dir: string) => {
     await setLastProjectDir(dir); // ✅ persist dir to store
     setProjectName(dir.split('/').pop() || 'New Project');
-    const tree = await buildFileTree(dir, BaseDirectory.AppLocalData);
+    const tree = await buildFileTree(dir);
     setFileTree(tree);
   };
 
@@ -106,13 +137,17 @@ function App() {
     async (content?: string) => {
       if (!selectedPath) return;
       try {
-        await saveToFile(selectedPath, content ?? markdown);
+        await saveToFile(
+          selectedPath,
+          content ?? markdown,
+          projectDir || undefined
+        );
         setUnsavedPaths((prev) => prev.filter((p) => p !== selectedPath));
       } catch {
         toast('Failed to save file!');
       }
     },
-    [selectedPath, markdown]
+    [selectedPath, markdown, projectDir]
   );
 
   const handleFileClick = useCallback(
@@ -124,7 +159,7 @@ function App() {
         }
         await saveCurrentFile();
       }
-      const content = await getFileContent(path);
+      const content = await getFileContent(path, projectDir || undefined);
       if (content === null) {
         toast("Oops! We Couldn't Open That!");
         return;
@@ -135,7 +170,7 @@ function App() {
       setSelectedPath(path);
       setUnsavedPaths((prev) => prev.filter((p) => p !== path));
     },
-    [selectedPath, unsavedPaths, saveCurrentFile]
+    [selectedPath, unsavedPaths, saveCurrentFile, projectDir]
   );
 
   useEffect(() => {
@@ -181,13 +216,27 @@ function App() {
     }
   };
 
-  const handleDrop = async (from: string, to: string) => {
-    toast('Notes reordering coming soon!');
+  const handleMove = async (fromPath: string, toFolderPath: string) => {
+    try {
+      const fileName = fromPath.split('/').pop();
+      const newPath = `${toFolderPath}/${fileName}`;
+      await moveFile(fromPath, newPath);
+      toast('File moved successfully!');
+      handleRefresh();
+
+      // Update selected path if the moved file was selected
+      if (selectedPath === fromPath) {
+        setSelectedPath(newPath);
+        setCurrentFile(fileName || 'Unknown');
+      }
+    } catch {
+      toast('Failed to move file!');
+    }
   };
 
   const handleRefresh = async () => {
     if (!projectDir) return;
-    const tree = await buildFileTree(projectDir, BaseDirectory.AppLocalData);
+    const tree = await buildFileTree(projectDir);
     setFileTree(tree);
   };
 
@@ -196,7 +245,29 @@ function App() {
   const showCreateFileDialog = () => {
     setCreateFileError(undefined);
     setNewFileName('');
+    setCreateFileParentPath(projectDir || '');
     setCreateFileOpen(true);
+  };
+
+  const showCreateFileInFolderDialog = (folderPath: string) => {
+    setCreateFileError(undefined);
+    setNewFileName('');
+    setCreateFileParentPath(folderPath);
+    setCreateFileOpen(true);
+  };
+
+  const showCreateFolderDialog = () => {
+    setCreateFolderError(undefined);
+    setNewFolderName('');
+    setCreateFolderParentPath(projectDir || '');
+    setCreateFolderOpen(true);
+  };
+
+  const showCreateFolderInFolderDialog = (folderPath: string) => {
+    setCreateFolderError(undefined);
+    setNewFolderName('');
+    setCreateFolderParentPath(folderPath);
+    setCreateFolderOpen(true);
   };
 
   const confirmCreateFile = async () => {
@@ -204,24 +275,83 @@ function App() {
       setCreateFileError('File name cannot be empty');
       return;
     }
-    if (!projectDir) {
-      setCreateFileError('No project directory');
+    const parentPath = createFileParentPath || projectDir;
+    if (!parentPath) {
+      setCreateFileError('No parent directory specified');
       return;
     }
+
     try {
-      const filePath = `${projectDir}/${newFileName}`;
-      await createFile(filePath, '');
+      // Auto-append .md extension if not present
+      let fileName = newFileName.trim();
+      if (!fileName.endsWith('.md') && !fileName.endsWith('.txt')) {
+        fileName += '.md';
+      }
+
+      const filePath = `${parentPath}/${fileName}`;
+      await createFile(
+        filePath,
+        '# New Note\n\nStart writing your thoughts here...\n',
+        projectDir || undefined
+      );
       setCreateFileOpen(false);
       setNewFileName('');
       setCreateFileError(undefined);
-      toast('File created!');
+      setCreateFileParentPath(null);
+      toast('File created successfully!');
+
+      // Refresh the file tree
       await handleRefresh();
+
+      // Auto-open the newly created file
+      setTimeout(async () => {
+        const content = await getFileContent(filePath, projectDir || undefined);
+        if (content !== null) {
+          setMarkdown(content);
+          setWordCount(countWords(content));
+          setCurrentFile(fileName);
+          setSelectedPath(filePath);
+          setUnsavedPaths((prev) => prev.filter((p) => p !== filePath));
+        }
+      }, 100); // Small delay to ensure file tree is refreshed
     } catch {
       setCreateFileError('Failed to create file!');
     }
   };
 
-  const handleNewFolder = () => toast('New folder creation coming soon');
+  const handleNewFolder = () => {
+    setCreateFolderError(undefined);
+    setNewFolderName('');
+    setCreateFolderParentPath(projectDir || '');
+    setCreateFolderOpen(true);
+  };
+
+  const confirmCreateFolder = async () => {
+    if (!newFolderName.trim()) {
+      setCreateFolderError('Folder name cannot be empty');
+      return;
+    }
+    const parentPath = createFolderParentPath || projectDir;
+    if (!parentPath) {
+      setCreateFolderError('No parent directory specified');
+      return;
+    }
+
+    try {
+      const folderPath = `${parentPath}/${newFolderName.trim()}`;
+      await createFolder(folderPath);
+      setCreateFolderOpen(false);
+      setNewFolderName('');
+      setCreateFolderError(undefined);
+      setCreateFolderParentPath(null);
+      toast('Folder created successfully!');
+
+      // Refresh the file tree
+      await handleRefresh();
+    } catch {
+      setCreateFolderError('Failed to create folder!');
+    }
+  };
 
   const handleChangeFolder = async () => {
     const dir = await open({ directory: true });
@@ -232,9 +362,64 @@ function App() {
     }
   };
 
-  const handleSettings = () => toast('Settings panel coming soon');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: '1',
+      title: 'Welcome to Writter!',
+      message: 'Thanks for using Writter Desktop. Check out the new features like background music and todo manager.',
+      type: 'info',
+      timestamp: new Date(Date.now() - 300000), // 5 minutes ago
+      read: false,
+    },
+    {
+      id: '2',
+      title: 'File Auto-saved',
+      message: 'Your document has been automatically saved.',
+      type: 'success',
+      timestamp: new Date(Date.now() - 60000), // 1 minute ago
+      read: false,
+    },
+  ]);
+
+  const handleSettings = () => setSettingsOpen(true);
+  const handleOpenNotifications = () => setNotificationsOpen(true);
   const handlePlayMusic = () => toast('Music player coming soon');
-  const handleStopMusic = () => toast('Music stop feature coming soon');
+  const handleMusicStateChange = (playing: boolean) => setMusicPlaying(playing);
+
+  const handleMarkNotificationAsRead = (id: string) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === id ? { ...notification, read: true } : notification
+      )
+    );
+  };
+
+  const handleMarkAllNotificationsAsRead = () => {
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, read: true }))
+    );
+  };
+
+  const handleDeleteNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
+
+  const handleClearAllNotifications = () => {
+    setNotifications([]);
+  };
+
+  const addNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: Date.now().toString(),
+      timestamp: new Date(),
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+  };
+
+  const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
   const hasLoadedProject = useRef(false);
 
@@ -244,6 +429,68 @@ function App() {
       handleProjectChosen(projectDir);
     }
   }, [settingsLoaded, projectDir]);
+
+  // Listen for file open requests from OS (when app is opened with a file)
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    const setupFileOpenListener = async () => {
+      try {
+        unlisten = await listen<string>('open-file-request', async (event) => {
+          const filePath = event.payload;
+
+          // Set the project directory to the parent folder of the opened file
+          const parentDir = filePath.substring(0, filePath.lastIndexOf('/'));
+          await setLastProjectDir(parentDir);
+          setProjectName(parentDir.split('/').pop() || 'Project');
+
+          // Build file tree for the parent directory
+          const tree = await buildFileTree(parentDir);
+          setFileTree(tree);
+
+          // Open the specific file
+          const content = await getFileContent(filePath, parentDir);
+          if (content !== null) {
+            setMarkdown(content);
+            setWordCount(countWords(content));
+            setCurrentFile(filePath.split('/').pop() || 'Unknown');
+            setSelectedPath(filePath);
+            setUnsavedPaths((prev) => prev.filter((p) => p !== filePath));
+            toast(`Opened file: ${filePath.split('/').pop()}`);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to setup file open listener:', error);
+      }
+    };
+
+    if (settingsLoaded) {
+      setupFileOpenListener();
+    }
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, [settingsLoaded, setLastProjectDir]);
+
+  // Handle inserting content from markdown utilities
+  const handleInsertContent = useCallback(
+    (content: string) => {
+      setMarkdown((prev) => {
+        const newContent = prev + '\n\n' + content;
+        setWordCount(countWords(newContent));
+        if (selectedPath && !unsavedPaths.includes(selectedPath)) {
+          setUnsavedPaths((prevPaths) => [...prevPaths, selectedPath]);
+        }
+        return newContent;
+      });
+      toast.success('Content inserted successfully!');
+    },
+    [selectedPath, unsavedPaths]
+  );
+
   if (!settingsLoaded) {
     return <LoadingScreen />;
   }
@@ -259,14 +506,14 @@ function App() {
           selectedPath={!!selectedPath}
           showPreview={isPreviewOpen}
           togglePreview={() => setIsPreviewOpen(!isPreviewOpen)}
-          musicPlaying={false}
-          playMusic={handlePlayMusic}
+          musicPlaying={musicPlaying}
           currentFile={currentFile}
           projectName={projectName}
-          openSettings={handleSettings}
           saveFile={handleSaveFile}
           autoSave={autoSave}
           onAutoSave={setAutoSave}
+          onInsertContent={handleInsertContent}
+          onMusicStateChange={handleMusicStateChange}
         />
         <main className="flex h-[90vh] w-full flex-auto items-center justify-center overflow-hidden bg-zinc-900 text-white">
           <ViewLayout
@@ -280,9 +527,11 @@ function App() {
                 onFileClick={handleFileClick}
                 onCreateNewFile={showCreateFileDialog}
                 onCreateNewFolder={handleNewFolder}
+                onCreateFileInFolder={showCreateFileInFolderDialog}
+                onCreateFolderInFolder={showCreateFolderInFolderDialog}
                 onRename={handleRename}
                 onDelete={handleDelete}
-                onDrop={handleDrop}
+                onMove={handleMove}
                 onRefresh={handleRefresh}
                 onSync={handleSync}
               />
@@ -299,12 +548,42 @@ function App() {
       <CreateFileDialog
         open={createFileOpen}
         setOpen={setCreateFileOpen}
-        parentPath={projectDir!}
+        parentPath={createFileParentPath || projectDir || ''}
         fileName={newFileName}
         setFileName={setNewFileName}
         confirmCreate={confirmCreateFile}
         errorMessage={createFileError}
       />
+
+      <CreateFolderDialog
+        open={createFolderOpen}
+        setOpen={setCreateFolderOpen}
+        parentPath={createFolderParentPath || projectDir || ''}
+        folderName={newFolderName}
+        setFolderName={setNewFolderName}
+        confirmCreate={confirmCreateFolder}
+        errorMessage={createFolderError}
+      />
+
+      {/* TODO: Uncomment when settings functionality is ready
+      <SettingsDialog 
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        trigger={null}
+      />
+      */}
+
+      {/* TODO: Uncomment when notifications functionality is ready
+      <NotificationsDialog
+        open={notificationsOpen}
+        onOpenChange={setNotificationsOpen}
+        notifications={notifications}
+        onMarkAsRead={handleMarkNotificationAsRead}
+        onMarkAllAsRead={handleMarkAllNotificationsAsRead}
+        onDeleteNotification={handleDeleteNotification}
+        onClearAll={handleClearAllNotifications}
+      />
+      */}
     </>
   );
 }

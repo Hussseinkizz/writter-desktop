@@ -14,13 +14,19 @@ interface Props {
   onCreateNewFolder: () => void;
   onRename: (path: string, newName: string) => void;
   onDelete: (path: string) => void;
-  onDrop: (from: string, to: string) => void;
+  onMove: (fromPath: string, toFolderPath: string) => void;
   onRefresh: () => void;
   onSync: () => void;
   changeFolder: () => void;
   openSettings: () => void;
+  onCreateFileInFolder?: (folderPath: string) => void;
+  onCreateFolderInFolder?: (folderPath: string) => void;
 }
 
+/**
+ * Sidebar component for file navigation and management
+ * Updated to use move functionality instead of drag/drop
+ */
 export const Sidebar = ({
   fileTree,
   selectedPath,
@@ -30,11 +36,13 @@ export const Sidebar = ({
   onCreateNewFolder,
   onRename,
   onDelete,
-  onDrop,
+  onMove,
   onRefresh,
   onSync,
   changeFolder,
   openSettings,
+  onCreateFileInFolder,
+  onCreateFolderInFolder,
 }: Props) => {
   const [search, setSearch] = useState('');
 
@@ -55,14 +63,16 @@ export const Sidebar = ({
         onSync={onSync}
       />
       <SidebarSearch onChange={setSearch} />
-      <div className="flex-1 overflow-auto px-4 py-2">
+      <div className="flex-1 --flex --items-start overflow-auto px-4 py-2">
         <FileTree
           tree={filteredTree}
           selectedPath={selectedPath}
           onFileSelected={onFileClick}
           onRename={onRename}
           onDelete={onDelete}
-          onDrop={onDrop}
+          onMove={onMove}
+          onCreateFileInFolder={onCreateFileInFolder}
+          onCreateFolderInFolder={onCreateFolderInFolder}
           unsavedPaths={unsavedPaths}
         />
       </div>

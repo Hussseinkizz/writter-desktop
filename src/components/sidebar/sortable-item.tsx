@@ -1,22 +1,27 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   HiDocument,
   HiFolder,
   HiFolderOpen,
   HiPencil,
   HiTrash,
+  HiArrowRightOnRectangle,
+  HiDocumentPlus,
+  HiFolderPlus,
+  HiChevronDown,
+  HiChevronRight,
 } from 'react-icons/hi2';
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
+  ContextMenuSeparator,
 } from '@/components/ui/context-menu';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { FileNode } from '@/utils/build-tree';
+import { motion } from 'framer-motion';
 
-interface SortableItemProps {
+interface FileTreeItemProps {
   node: FileNode;
   depth: number;
   selectedPath: string | null;
@@ -26,9 +31,17 @@ interface SortableItemProps {
   toggleFolder: (path: string) => void;
   startRename: (path: string, currentName: string) => void;
   setConfirmingDeletePath: (path: string) => void;
+  setMovingFilePath: (path: string) => void;
+  onCreateFileInFolder?: (folderPath: string) => void;
+  onCreateFolderInFolder?: (folderPath: string) => void;
+  index: number;
 }
 
-export const SortableItem: React.FC<SortableItemProps> = ({
+/**
+ * FileTreeItem component - replaces SortableItem with simpler implementation
+ * Removed drag/drop functionality and added move option to context menu
+ */
+export const FileTreeItem: React.FC<FileTreeItemProps> = ({
   node,
   depth,
   selectedPath,
@@ -38,86 +51,99 @@ export const SortableItem: React.FC<SortableItemProps> = ({
   toggleFolder,
   startRename,
   setConfirmingDeletePath,
+  setMovingFilePath,
+  onCreateFileInFolder,
+  onCreateFolderInFolder,
+  index,
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: node.path });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    paddingLeft: depth * 1,
-    padding: '0.5em',
-    cursor: isDragging ? 'grab' : 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'start',
-    width: '100%',
-  };
-
   const isSelected = selectedPath === node.path;
   const hasUnsaved = unsavedPaths.includes(node.path);
   const isDir = node.isDir;
   const isOpen = openFolders[node.path] ?? true;
-  const DRAG_CLICK_THRESHOLD = 4; // pixels
-  const pointerDown = useRef<{ x: number; y: number } | null>(null);
+
+  const style = {
+    paddingLeft: depth * 3, // 3px per depth level
+  };
 
   return (
-    <ContextMenu key={node.path}>
-      <ContextMenuTrigger
-        asChild
-        className="flex items-center justify-start gap-2 w-full">
-        <div
-          ref={setNodeRef}
-          {...attributes}
-          style={style}
-          className={`flex items-center justify-start gap-2 text-sm cursor-pointer rounded-md w-full ${
-            isSelected
-              ? 'bg-zinc-800 text-white'
-              : 'text-zinc-400 hover:bg-zinc-800'
-          }`}
-          onPointerDown={(e) => {
-            pointerDown.current = { x: e.clientX, y: e.clientY };
-            // Call dnd-kit pointer down listener!
-            listeners?.onPointerDown?.(e);
-          }}
-          onPointerUp={(e) => {
-            if (!pointerDown.current) return;
-            const dx = Math.abs(e.clientX - pointerDown.current.x);
-            const dy = Math.abs(e.clientY - pointerDown.current.y);
-            pointerDown.current = null;
-            if (dx < DRAG_CLICK_THRESHOLD && dy < DRAG_CLICK_THRESHOLD) {
-              if (!isDir) onFileSelected(node.path);
-            }
-          }}>
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{
+        duration: 0.2,
+        ease: 'easeOut',
+        delay: index * 0.03, // Stagger animation
+      }}
+      className="w-full">
+      <ContextMenu key={node.path}>
+        <ContextMenuTrigger
+          asChild
+          className="flex items-center justify-start gap-2 w-full">
           <div
-            className="flex items-center justify-start gap-2 overflow-hidden w-full"
-            onClick={(e) => {
+            style={style}
+            className={`flex items-center justify-start gap-2 text-sm cursor-pointer rounded-md w-full p-2 transition-colors duration-150 ${
+              isSelected
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
+            }`}
+            onClick={() => {
               if (isDir) {
-                e.stopPropagation();
                 toggleFolder(node.path);
+              } else {
+                onFileSelected(node.path);
               }
             }}>
-            {isDir ? isOpen ? <HiFolderOpen /> : <HiFolder /> : <HiDocument />}
-            <span className="truncate">{node.name}</span>
+            <div className="flex items-center justify-start gap-2 overflow-hidden w-full">
+              {isDir && (
+                <div className="flex items-center">
+                  {isOpen ? (
+                    <HiChevronDown className="text-zinc-400 w-4 h-4" />
+                  ) : (
+                    <HiChevronRight className="text-zinc-400 w-4 h-4" />
+                  )}
+                </div>
+              )}
+              {isDir ? (
+                isOpen ? (
+                  <HiFolderOpen className="text-amber-400" />
+                ) : (
+                  <HiFolder className="text-amber-400" />
+                )
+              ) : (
+                <HiDocument className="text-gray-400" />
+              )}
+              <span className="truncate">{node.name}</span>
+            </div>
+            {hasUnsaved && !isDir && (
+              <span className="text-green-400 ml-auto">●</span>
+            )}
           </div>
-          {hasUnsaved && !isDir && <span className="text-green-400">●</span>}
-        </div>
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-40 dark">
-        <ContextMenuItem onClick={() => startRename(node.path, node.name)}>
-          <HiPencil className="mr-2" /> Rename
-        </ContextMenuItem>
-        <ContextMenuItem onClick={() => setConfirmingDeletePath(node.path)}>
-          <HiTrash className="mr-2" /> Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-48 dark">
+          {isDir && (
+            <>
+              <ContextMenuItem onClick={() => onCreateFileInFolder?.(node.path)}>
+                <HiDocumentPlus className="mr-2" /> New File
+              </ContextMenuItem>
+              <ContextMenuItem onClick={() => onCreateFolderInFolder?.(node.path)}>
+                <HiFolderPlus className="mr-2" /> New Folder
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+            </>
+          )}
+          <ContextMenuItem onClick={() => startRename(node.path, node.name)}>
+            <HiPencil className="mr-2" /> Rename
+          </ContextMenuItem>
+          {!isDir && (
+            <ContextMenuItem onClick={() => setMovingFilePath(node.path)}>
+              <HiArrowRightOnRectangle className="mr-2" /> Move to Folder
+            </ContextMenuItem>
+          )}
+          <ContextMenuItem onClick={() => setConfirmingDeletePath(node.path)}>
+            <HiTrash className="mr-2" /> Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    </motion.div>
   );
 };

@@ -38,7 +38,7 @@ export const CreateFileDialog = ({
         </DialogHeader>
         <Input
           autoFocus
-          placeholder="e.g. note.md"
+          placeholder="e.g. my-notes (will become my-notes.md)"
           value={fileName}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setFileName(e.target.value)
@@ -48,6 +48,9 @@ export const CreateFileDialog = ({
             else if (e.key === 'Escape') setOpen(false);
           }}
         />
+        <div className="text-xs text-muted-foreground">
+          💡 Files without extensions will automatically get .md extension
+        </div>
         {errorMessage && (
           <div className="text-sm text-red-500 mt-1">{errorMessage}</div>
         )}
