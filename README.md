@@ -4,7 +4,7 @@ The fully offline-first desktop minimalistic markdown editor for your notes and 
 
 ![Preview](./public/new.png)
 
-> **Version:** v0.0.8 Beta
+> **Version:** v0.0.9 Beta
 
 ## Why Choose Writter?
 
