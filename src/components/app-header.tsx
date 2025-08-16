@@ -79,7 +79,7 @@ export function AppHeader({
   };
 
   return (
-    <header className="flex h-[5vh] w-full items-center justify-between border-b border-zinc-800 bg-neutral-900 px-4 py-2 text-neutral-200 shadow">
+    <header className="flex h-[6vh] w-full items-center justify-between border-b border-zinc-800 bg-neutral-900 px-4 py-2 text-neutral-200 shadow">
       {/* Left: Project & File */}
       <div className="flex items-center gap-2">
         <HiFolder className="text-amber-500" />
@@ -94,39 +94,58 @@ export function AppHeader({
         <span className="text-xs text-neutral-400">{formattedTime}</span>
       </div>
 
-      {/* Right: Auto Save, Save Button, and Utilities Menu */}
+      {/* Right: Preview, Guide, Save, and Utilities Menu */}
       <div className="flex items-center gap-3">
-        {/* Auto Save Toggle */}
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={autoSave}
-            onCheckedChange={(v: boolean) => {
-              onAutoSave(v);
-              toast(autoSave ? 'Auto Save off' : 'Auto Save on');
-            }}
-            id="auto-save"
-          />
-          <label htmlFor="auto-save" className="text-xs text-neutral-300">
-            Auto Save
-          </label>
-        </div>
+        {/* Preview Toggle Button */}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={togglePreview}
+          className="flex items-center gap-1 px-2 py-1 h-8 border-zinc-700 text-neutral-300 hover:bg-zinc-800 hover:text-white text-xs">
+          {showPreview ? (
+            <>
+              <HiEyeOff className="text-sm" />
+              Hide Preview
+            </>
+          ) : (
+            <>
+              <HiEye className="text-sm" />
+              Preview
+            </>
+          )}
+        </Button>
+
+        {/* Guide Toggle Button */}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            const trigger = document.querySelector(
+              '[data-dialog="cheat-sheet"] button'
+            ) as HTMLButtonElement;
+            trigger?.click();
+          }}
+          className="flex items-center gap-1 px-2 py-1 h-8 border-zinc-700 text-neutral-300 hover:bg-zinc-800 hover:text-white text-xs">
+          <HiCode className="text-sm" />
+          Guide
+        </Button>
 
         {/* Save Button */}
         <Button
           size="sm"
           onClick={handleSave}
           disabled={saving || !selectedPath}
-          className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-4 py-2 rounded shadow transition">
+          className="flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-3 py-1 h-8 rounded shadow transition text-xs">
           {saving ? (
             <>
-              <span className="mr-1 animate-spin">
-                <Loader2 />
+              <span className="animate-spin">
+                <Loader2 className="h-3 w-3" />
               </span>
               Saving...
             </>
           ) : (
             <>
-              <HiCheck className="text-lg" />
+              <HiCheck className="text-sm" />
               Save
             </>
           )}
@@ -148,19 +167,20 @@ export function AppHeader({
             sideOffset={5}>
             {/* View Options */}
             <DropdownMenuItem
-              onClick={togglePreview}
-              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
-              {showPreview ? (
-                <>
-                  <HiEyeOff className="h-4 w-4 text-neutral-400" />
-                  <span>Hide Preview</span>
-                </>
-              ) : (
-                <>
-                  <HiEye className="h-4 w-4 text-neutral-400" />
-                  <span>Show Preview</span>
-                </>
-              )}
+              onClick={() => {
+                onAutoSave(!autoSave);
+                toast(autoSave ? 'Auto Save disabled' : 'Auto Save enabled');
+              }}
+              className="flex items-center justify-between cursor-pointer hover:bg-neutral-800">
+              <div className="flex items-center gap-3">
+                <span className="h-4 w-4 text-neutral-400">💾</span>
+                <span>Auto Save</span>
+              </div>
+              <Switch
+                checked={autoSave}
+                onCheckedChange={() => {}}
+                className="pointer-events-none scale-75"
+              />
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="bg-neutral-700" />
@@ -168,28 +188,21 @@ export function AppHeader({
             {/* Markdown Tools */}
             <DropdownMenuItem
               onClick={() => {
-                // Find and click the hidden dialog trigger
-                const trigger = document.querySelector('[data-dialog="cheat-sheet"] button') as HTMLButtonElement;
-                trigger?.click();
-              }}
-              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
-              <HiCode className="h-4 w-4 text-neutral-400" />
-              <span>Markdown Cheat Sheet</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              onClick={() => {
-                const trigger = document.querySelector('[data-dialog="snippets"] button') as HTMLButtonElement;
+                const trigger = document.querySelector(
+                  '[data-dialog="snippets"] button'
+                ) as HTMLButtonElement;
                 trigger?.click();
               }}
               className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
               <HiTemplate className="h-4 w-4 text-neutral-400" />
-              <span>Code Snippets</span>
+              <span>Snippets Library</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem
               onClick={() => {
-                const trigger = document.querySelector('[data-dialog="table"] button') as HTMLButtonElement;
+                const trigger = document.querySelector(
+                  '[data-dialog="table"] button'
+                ) as HTMLButtonElement;
                 trigger?.click();
               }}
               className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
@@ -199,7 +212,9 @@ export function AppHeader({
 
             <DropdownMenuItem
               onClick={() => {
-                const trigger = document.querySelector('[data-dialog="formatting"] button') as HTMLButtonElement;
+                const trigger = document.querySelector(
+                  '[data-dialog="formatting"] button'
+                ) as HTMLButtonElement;
                 trigger?.click();
               }}
               className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
@@ -212,7 +227,9 @@ export function AppHeader({
             {/* Enhanced Features */}
             <DropdownMenuItem
               onClick={() => {
-                const trigger = document.querySelector('[data-dialog="music"] button') as HTMLButtonElement;
+                const trigger = document.querySelector(
+                  '[data-dialog="music"] button'
+                ) as HTMLButtonElement;
                 trigger?.click();
               }}
               className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
@@ -222,7 +239,9 @@ export function AppHeader({
 
             <DropdownMenuItem
               onClick={() => {
-                const trigger = document.querySelector('[data-dialog="todo"] button') as HTMLButtonElement;
+                const trigger = document.querySelector(
+                  '[data-dialog="todo"] button'
+                ) as HTMLButtonElement;
                 trigger?.click();
               }}
               className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
@@ -235,7 +254,9 @@ export function AppHeader({
             {/* About */}
             <DropdownMenuItem
               onClick={() => {
-                const trigger = document.querySelector('[data-dialog="about"] button') as HTMLButtonElement;
+                const trigger = document.querySelector(
+                  '[data-dialog="about"] button'
+                ) as HTMLButtonElement;
                 trigger?.click();
               }}
               className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">

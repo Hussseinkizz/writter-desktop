@@ -53,7 +53,7 @@ export const AboutDialog = () => {
               <Badge
                 variant="secondary"
                 className="bg-violet-600/20 text-violet-300 border-violet-500/30">
-                v0.0.7
+                v0.0.8
               </Badge>
             </div>
           </div>
@@ -86,9 +86,7 @@ export const AboutDialog = () => {
                 variant="outline"
                 size="sm"
                 className="border-amber-600/50 text-amber-400 hover:bg-amber-600/10"
-                onClick={() =>
-                  openUrl('https://buymeacoffee.com/husseinkizz')
-                }>
+                onClick={() => openUrl('https://buymeacoffee.com/husseinkizz')}>
                 <HiHeart className="h-4 w-4 mr-2" />
                 Support the Author
               </Button>

@@ -81,7 +81,7 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
           className="flex items-center justify-start gap-2 w-full">
           <div
             style={style}
-            className={`flex items-center justify-start gap-2 text-sm cursor-pointer rounded-md w-full p-2 transition-colors duration-150 ${
+            className={`flex items-center justify-start gap-2 --text-sm cursor-pointer rounded-md w-full p-2 transition-colors duration-150 ${
               isSelected
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
@@ -122,10 +122,12 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
         <ContextMenuContent className="w-48 dark">
           {isDir && (
             <>
-              <ContextMenuItem onClick={() => onCreateFileInFolder?.(node.path)}>
+              <ContextMenuItem
+                onClick={() => onCreateFileInFolder?.(node.path)}>
                 <HiDocumentPlus className="mr-2" /> New File
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => onCreateFolderInFolder?.(node.path)}>
+              <ContextMenuItem
+                onClick={() => onCreateFolderInFolder?.(node.path)}>
                 <HiFolderPlus className="mr-2" /> New Folder
               </ContextMenuItem>
               <ContextMenuSeparator />

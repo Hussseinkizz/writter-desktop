@@ -3,13 +3,18 @@ import { WelcomeScreen } from '@/components/welcome-screen';
 import { AppHeader } from '@/components/app-header';
 import { AppFooter } from '@/components/app-footer';
 import { ViewLayout } from '@/components/view-layout';
-import { Editor } from '@/components/new-editor';
+// import { Editor } from '@/components/new-editor';
+import { MarkdownEditor as Editor } from '@/components/ace-editor';
 import { Preview } from '@/components/new-preview';
+import { UIWPreview } from '@/components/uiw-preview';
 import { Sidebar } from '@/components/sidebar/sidebar';
 import { CreateFileDialog } from '@/components/sidebar/create-file-dialog';
 import { CreateFolderDialog } from '@/components/sidebar/create-folder-dialog';
 import { SettingsDialog } from '@/components/settings/settings-dialog';
-import { NotificationsDialog, Notification } from '@/components/notifications-dialog';
+import {
+  NotificationsDialog,
+  Notification,
+} from '@/components/notifications-dialog';
 import { buildFileTree, FileNode } from '@/utils/build-tree';
 import { toast } from 'sonner';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -55,14 +60,18 @@ function App() {
   const [createFileError, setCreateFileError] = useState<string | undefined>(
     undefined
   );
-  const [createFileParentPath, setCreateFileParentPath] = useState<string | null>(null);
+  const [createFileParentPath, setCreateFileParentPath] = useState<
+    string | null
+  >(null);
 
   const [createFolderOpen, setCreateFolderOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
-  const [createFolderError, setCreateFolderError] = useState<string | undefined>(
-    undefined
-  );
-  const [createFolderParentPath, setCreateFolderParentPath] = useState<string | null>(null);
+  const [createFolderError, setCreateFolderError] = useState<
+    string | undefined
+  >(undefined);
+  const [createFolderParentPath, setCreateFolderParentPath] = useState<
+    string | null
+  >(null);
 
   const [wordCount, setWordCount] = useState(
     selectedPath ? countWords(markdown) : 0
@@ -368,7 +377,8 @@ function App() {
     {
       id: '1',
       title: 'Welcome to Writter!',
-      message: 'Thanks for using Writter Desktop. Check out the new features like background music and todo manager.',
+      message:
+        'Thanks for using Writter Desktop. Check out the new features like background music and todo manager.',
       type: 'info',
       timestamp: new Date(Date.now() - 300000), // 5 minutes ago
       read: false,
@@ -389,37 +399,41 @@ function App() {
   const handleMusicStateChange = (playing: boolean) => setMusicPlaying(playing);
 
   const handleMarkNotificationAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
+    setNotifications((prev) =>
+      prev.map((notification) =>
         notification.id === id ? { ...notification, read: true } : notification
       )
     );
   };
 
   const handleMarkAllNotificationsAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, read: true }))
     );
   };
 
   const handleDeleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    setNotifications((prev) =>
+      prev.filter((notification) => notification.id !== id)
+    );
   };
 
   const handleClearAllNotifications = () => {
     setNotifications([]);
   };
 
-  const addNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
+  const addNotification = (
+    notification: Omit<Notification, 'id' | 'timestamp'>
+  ) => {
     const newNotification: Notification = {
       ...notification,
       id: Date.now().toString(),
       timestamp: new Date(),
     };
-    setNotifications(prev => [newNotification, ...prev]);
+    setNotifications((prev) => [newNotification, ...prev]);
   };
 
-  const unreadNotificationsCount = notifications.filter(n => !n.read).length;
+  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
 
   const hasLoadedProject = useRef(false);
 
@@ -539,7 +553,7 @@ function App() {
             selectedPath={!!selectedPath}
             showPreview={isPreviewOpen}
             middleElement={<Editor value={markdown} onChange={handleChange} />}
-            rightSidebarElement={<Preview markdown={markdown} />}
+            rightSidebarElement={<UIWPreview markdown={markdown} />}
           />
         </main>
         <AppFooter wordCount={wordCount} />
