@@ -1,21 +1,31 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+	return twMerge(clsx(inputs));
 }
 
-// Utility function for safe try operations (following coding rules)
-export function safeTry<T>(fn: () => T | Promise<T>) {
-  try {
-    const result = fn();
-    if (result instanceof Promise) {
-      return result
-        .then(value => ({ err: null, result: value }))
-        .catch(error => ({ err: error, result: null }));
-    }
-    return { err: null, result };
-  } catch (error) {
-    return { err: error, result: null };
-  }
-}
+/**
+ * Executes a function and returns a SafeResult with the result or error.
+ * @param fn - The synchronous or asynchronous function to execute.
+ * @param throwTheError - If true, rethrows the error on catch.
+ * @returns An object containing the result or error.
+ */
+export const safeTry = async <T>(
+	fn: () => Promise<T>,
+	throwTheError = false,
+) => {
+	let result: T | null = null;
+	let error: unknown = null;
+	try {
+		result = await fn();
+	} catch (e) {
+		console.error(e);
+		if (throwTheError) {
+			throw e;
+		}
+		error = e;
+	}
+
+	return { result, error };
+};

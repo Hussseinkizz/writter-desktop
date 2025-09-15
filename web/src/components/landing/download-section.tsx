@@ -19,7 +19,8 @@ import { useEffect, useState } from 'react';
 // Custom Windows icon component since SiWindows doesn't exist
 function WindowsIcon({ className }: { className?: string }) {
   return (
-    <svg 
+    // biome-ignore lint/a11y/noSvgWithoutTitle: doesn't apply
+<svg 
       viewBox="0 0 24 24" 
       className={className}
       fill="currentColor"
