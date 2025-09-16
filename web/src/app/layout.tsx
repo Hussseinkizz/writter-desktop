@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Writter Desktop - Minimalistic Markdown Editor',
+  title: 'Writter - Minimalistic Markdown Editor',
   description:
     'The fully offline-first desktop minimalistic markdown editor for your notes and thoughts. Free and open source. Available for Windows, macOS, and Linux.',
   keywords: [
@@ -25,16 +25,16 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: 'Writter Desktop - Minimalistic Markdown Editor',
+    title: 'Writter - Minimalistic Markdown Editor',
     description:
       'The fully offline-first desktop minimalistic markdown editor for your notes and thoughts. Free and open source.',
-    siteName: 'Writter Desktop',
+    siteName: 'Writter',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Writter Desktop - Minimalistic Markdown Editor',
+        alt: 'Writter - Minimalistic Markdown Editor',
       },
     ],
     locale: 'en_US',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Writter Desktop - Minimalistic Markdown Editor',
+    title: 'Writter - Minimalistic Markdown Editor',
     description:
       'The fully offline-first desktop minimalistic markdown editor for your notes and thoughts. Free and open source.',
     images: ['/twitter-image.png'],
