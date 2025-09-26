@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   HiDocument,
   HiFolder,
@@ -10,25 +10,25 @@ import {
   HiFolderPlus,
   HiChevronDown,
   HiChevronRight,
-} from "react-icons/hi2";
-import { HiDotsVertical } from "react-icons/hi";
+} from 'react-icons/hi2';
+import { HiDotsVertical } from 'react-icons/hi';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { FileTreeDropdownMenu } from "./file-tree-dropdown-menu";
+} from '@/components/ui/dropdown-menu';
+import { FileTreeDropdownMenu } from './file-tree-dropdown-menu';
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
   ContextMenuSeparator,
-} from "@/components/ui/context-menu";
-import { FileNode } from "@/utils/build-tree";
-import { motion } from "framer-motion";
-import { DropdownMenuSeparator } from "@radix-ui/react-dropdown-menu";
+} from '@/components/ui/context-menu';
+import { FileNode } from '@/utils/build-tree';
+import { motion } from 'framer-motion';
+import { DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu';
 
 interface FileTreeItemProps {
   node: FileNode;
@@ -68,7 +68,7 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
   const isSelected = selectedPath === node.path;
   const hasUnsaved = unsavedPaths.includes(node.path);
   const isDir = node.isDir;
-  const isOpen = openFolders[node.path] ?? true;
+  const isOpen = openFolders[node.path] ?? false;
 
   const style = {
     paddingLeft: depth * 3, // 3px per depth level
@@ -80,22 +80,20 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
       animate={{ opacity: 1, x: 0 }}
       transition={{
         duration: 0.2,
-        ease: "easeOut",
+        ease: 'easeOut',
         delay: index * 0.03, // Stagger animation
       }}
-      className="w-full"
-    >
+      className="w-full">
       <ContextMenu key={node.path}>
         <ContextMenuTrigger
           asChild
-          className="flex items-center justify-start gap-2 w-full"
-        >
+          className="flex items-center justify-start gap-2 w-full">
           <div
             style={style}
-            className={`flex items-center justify-start gap-2 --text-sm cursor-pointer rounded-md w-full p-2 transition-colors duration-150 ${
+            className={`group flex items-center justify-start gap-2 --text-sm cursor-pointer rounded-md w-full p-2 transition-colors duration-150 ${
               isSelected
-                ? "bg-zinc-800 text-white"
-                : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
             }`}
             onClick={() => {
               if (isDir) {
@@ -103,9 +101,8 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
               } else {
                 onFileSelected(node.path);
               }
-            }}
-          >
-            <div className="flex items-center justify-start gap-2 overflow-hidden w-full">
+            }}>
+            <div className="flex items-center justify-start gap-2 overflow-hidden w-full group">
               {isDir && (
                 <div className="flex items-center">
                   {isOpen ? (
@@ -137,6 +134,7 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
               setMovingFilePath={setMovingFilePath}
               onCreateFileInFolder={onCreateFileInFolder}
               onCreateFolderInFolder={onCreateFolderInFolder}
+              isActive={isSelected}
             />
           </div>
         </ContextMenuTrigger>
@@ -144,13 +142,11 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
           {isDir && (
             <>
               <ContextMenuItem
-                onClick={() => onCreateFileInFolder?.(node.path)}
-              >
+                onClick={() => onCreateFileInFolder?.(node.path)}>
                 <HiDocumentPlus className="mr-2" /> New File
               </ContextMenuItem>
               <ContextMenuItem
-                onClick={() => onCreateFolderInFolder?.(node.path)}
-              >
+                onClick={() => onCreateFolderInFolder?.(node.path)}>
                 <HiFolderPlus className="mr-2" /> New Folder
               </ContextMenuItem>
               <ContextMenuSeparator />

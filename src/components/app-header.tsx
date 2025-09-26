@@ -34,6 +34,61 @@ import {
 import { BackgroundMusicPlayer, SimpleTodoManager } from './enhanced-features';
 import { AboutDialog } from './about-dialog';
 
+// Path utilities for cross-platform path truncation
+const getPathSeparator = (path: string): string => {
+  if (path.includes('\\')) return '\\'; // Windows
+  return '/'; // Unix/Linux/Mac
+};
+
+const truncateProjectName = (projectName: string, maxLength: number = 20): string => {
+  if (projectName.length <= maxLength) return projectName;
+  return projectName.substring(0, maxLength - 3) + '...';
+};
+
+const truncateFilePath = (filePath: string, maxLength: number = 30): string => {
+  if (filePath.length <= maxLength) return filePath;
+  
+  const separator = getPathSeparator(filePath);
+  const parts = filePath.split(separator);
+  
+  if (parts.length === 1) {
+    // Single file name, truncate from middle
+    const name = parts[0];
+    if (name.length <= maxLength) return name;
+    const start = Math.floor((maxLength - 3) / 2);
+    const end = name.length - (maxLength - 3 - start);
+    return name.substring(0, start) + '...' + name.substring(end);
+  }
+  
+  // Multiple path parts
+  const fileName = parts[parts.length - 1];
+  const pathParts = parts.slice(0, -1);
+  
+  // If just filename is too long
+  if (fileName.length > maxLength) {
+    const start = Math.floor((maxLength - 3) / 2);
+    const end = fileName.length - (maxLength - 3 - start);
+    return fileName.substring(0, start) + '...' + fileName.substring(end);
+  }
+  
+  // Build truncated path
+  let result = fileName;
+  let remainingLength = maxLength - fileName.length - 3; // Reserve space for "..." and separator
+  
+  for (let i = pathParts.length - 1; i >= 0; i--) {
+    const part = pathParts[i];
+    if (part.length + separator.length <= remainingLength) {
+      result = part + separator + result;
+      remainingLength -= part.length + separator.length;
+    } else {
+      result = '...' + separator + result;
+      break;
+    }
+  }
+  
+  return result;
+};
+
 type HeaderProps = {
   projectName: string;
   currentFile: string;
@@ -68,6 +123,10 @@ export function AppHeader({
   const formattedDate = format(now, 'EEEE, MMMM do, yyyy', { timeZone });
   const formattedTime = format(now, 'hh:mm:ss a zzz', { timeZone });
 
+  // Preprocess project name and file path for display
+  const displayProjectName = truncateProjectName(projectName);
+  const displayCurrentFile = truncateFilePath(currentFile);
+
   const handleSave = async () => {
     setSaving(true);
     saveFile();
@@ -83,9 +142,19 @@ export function AppHeader({
       {/* Left: Project & File */}
       <div className="flex items-center gap-2">
         <HiFolder className="text-amber-500" />
-        <span className="capitalize font-semibold truncate">{projectName}</span>
+        <span 
+          className="capitalize font-semibold truncate" 
+          title={projectName}
+        >
+          {displayProjectName}
+        </span>
         <span className="mx-1 text-zinc-400">/</span>
-        <span className="font-mono truncate">{currentFile}</span>
+        <span 
+          className="font-mono truncate" 
+          title={currentFile}
+        >
+          {displayCurrentFile}
+        </span>
       </div>
 
       {/* Middle: Date & Time */}

@@ -53,7 +53,7 @@ export const AboutDialog = () => {
               <Badge
                 variant="secondary"
                 className="bg-violet-600/20 text-violet-300 border-violet-500/30">
-                v0.0.9
+                v0.0.10
               </Badge>
             </div>
           </div>

@@ -118,7 +118,7 @@ export function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
           className="mt-8 text-sm text-zinc-500">
-          v0.0.9 Beta • Free & Open Source • Available for Windows, macOS &
+          v0.0.10 Beta • Free & Open Source • Available for Windows, macOS &
           Linux
         </motion.div>
       </div>

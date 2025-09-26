@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "writter",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "identifier": "com.writter.app",
   "build": {
     "beforeDevCommand": "yarn dev",
