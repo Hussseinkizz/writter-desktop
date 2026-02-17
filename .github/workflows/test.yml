@@ -32,10 +32,8 @@ jobs:
       - name: Run tests
         run: pnpm test --run
 
-  publish-tauri:
+  build-tauri:
     needs: test
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -74,13 +72,5 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: app-v__VERSION__
-          releaseName: 'App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+      - name: Build Tauri app
+        run: pnpm tauri build ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
