@@ -75,7 +75,7 @@ export const BackgroundMusicPlayer = ({
     const fetchTrackInfo = async () => {
       try {
         let data: any = null;
-        if (!META_URL) {
+        if (META_URL) {
           const response = await fetch(META_URL);
           data = await response.json();
         }
