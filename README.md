@@ -2,7 +2,7 @@
 
 The fully offline-first desktop minimalistic markdown editor for your notes and thoughts, free and open source!
 
-![Preview](./public/new.png)
+![Preview](preview.png)
 
 > **Version:** v0.0.10 Beta
 
