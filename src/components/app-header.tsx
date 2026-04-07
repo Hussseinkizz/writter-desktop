@@ -14,6 +14,7 @@ import {
 } from 'react-icons/hi';
 import { useState } from 'react';
 import { format } from 'date-fns-tz';
+import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { toast } from 'sonner';
@@ -170,18 +171,26 @@ export function AppHeader({
           size="sm"
           variant="outline"
           onClick={togglePreview}
-          className="flex items-center gap-1 px-2 py-1 h-8 border-zinc-700 text-neutral-300 hover:bg-zinc-800 hover:text-white text-xs">
-          {showPreview ? (
-            <>
-              <HiEyeOff className="text-sm" />
-              Hide Preview
-            </>
-          ) : (
-            <>
-              <HiEye className="text-sm" />
-              Preview
-            </>
-          )}
+          className="flex items-center gap-1 px-2 py-1 h-8 border-zinc-700 text-neutral-300 hover:bg-zinc-800 hover:text-white text-xs overflow-hidden">
+          <motion.div
+            key={showPreview ? 'hide' : 'show'}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="flex items-center gap-1">
+            {showPreview ? (
+              <>
+                <HiEyeOff className="text-sm" />
+                Hide Preview
+              </>
+            ) : (
+              <>
+                <HiEye className="text-sm" />
+                Preview
+              </>
+            )}
+          </motion.div>
         </Button>
 
         {/* Guide Toggle Button */}
