@@ -12,6 +12,7 @@ import {
   HiMenu,
   HiInformationCircle,
 } from 'react-icons/hi';
+import { Keyboard } from 'lucide-react';
 import { useState } from 'react';
 import { format } from 'date-fns-tz';
 import { motion } from 'framer-motion';
@@ -102,6 +103,7 @@ type HeaderProps = {
   onInsertContent: (content: string) => void;
   onMusicStateChange: (playing: boolean) => void;
   musicPlaying: boolean;
+  onShowShortcuts?: () => void;
 };
 
 export function AppHeader({
@@ -116,6 +118,7 @@ export function AppHeader({
   onInsertContent,
   onMusicStateChange,
   musicPlaying,
+  onShowShortcuts,
 }: HeaderProps) {
   const [saving, setSaving] = useState(false);
 
@@ -325,6 +328,17 @@ export function AppHeader({
               className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
               <HiClipboardList className="h-4 w-4 text-neutral-400" />
               <span>Todo Manager</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="bg-neutral-700" />
+
+            {/* Keyboard Shortcuts */}
+            <DropdownMenuItem
+              onClick={onShowShortcuts}
+              className="flex items-center gap-3 cursor-pointer hover:bg-neutral-800">
+              <Keyboard className="h-4 w-4 text-violet-400" />
+              <span>Keyboard Shortcuts</span>
+              <span className="ml-auto text-[10px] text-neutral-500">Ctrl+Shift+?</span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="bg-neutral-700" />

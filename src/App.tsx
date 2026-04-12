@@ -29,7 +29,9 @@ import {
   createFolder,
 } from '@/utils/file-handlers';
 import { useSettings } from '@/hooks/use-settings';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { LoadingScreen } from './components/loading-screen';
+import { KeyboardShortcutsDialog } from './components/keyboard-shortcuts-dialog';
 import { pluginManager } from '@/plugins/plugin-manager';
 import { builtInPlugins } from '@/plugins/built-in-plugins';
 
@@ -51,6 +53,10 @@ function App() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [unsavedPaths, setUnsavedPaths] = useState<string[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const handleTogglePreview = useCallback(
+    () => setIsPreviewOpen((v) => !v),
+    []
+  );
   const [projectName, setProjectName] = useState<string>('Unknown');
   const [currentFile, setCurrentFile] = useState<string>('Unknown');
   const [musicPlaying, setMusicPlaying] = useState<boolean>(false);
@@ -182,17 +188,6 @@ function App() {
     [selectedPath, unsavedPaths, saveCurrentFile, projectDir]
   );
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        handleSaveFile();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [handleSaveFile]);
-
   const handleRename = async (path: string, newName: string) => {
     const parentDir = path.substring(0, path.lastIndexOf('/'));
     const newPath = `${parentDir}/${newName}`;
@@ -278,6 +273,14 @@ function App() {
     setCreateFolderParentPath(folderPath);
     setCreateFolderOpen(true);
   };
+
+  useKeyboardShortcuts({
+    onSave: handleSaveFile,
+    onTogglePreview: handleTogglePreview,
+    onNewFile: showCreateFileDialog,
+    onNewFolder: showCreateFolderDialog,
+    onShowShortcuts: () => setShortcutsOpen(true),
+  });
 
   const confirmCreateFile = async () => {
     if (!newFileName.trim()) {
@@ -373,6 +376,7 @@ function App() {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
@@ -519,7 +523,7 @@ function App() {
         <AppHeader
           selectedPath={!!selectedPath}
           showPreview={isPreviewOpen}
-          togglePreview={() => setIsPreviewOpen(!isPreviewOpen)}
+          togglePreview={handleTogglePreview}
           musicPlaying={musicPlaying}
           currentFile={currentFile}
           projectName={projectName}
@@ -528,6 +532,7 @@ function App() {
           onAutoSave={setAutoSave}
           onInsertContent={handleInsertContent}
           onMusicStateChange={handleMusicStateChange}
+          onShowShortcuts={() => setShortcutsOpen(true)}
         />
         <main className="flex h-[90vh] w-full flex-auto items-center justify-center overflow-hidden bg-zinc-900 text-white">
           <ViewLayout
@@ -579,8 +584,13 @@ function App() {
         errorMessage={createFolderError}
       />
 
+      <KeyboardShortcutsDialog
+        open={shortcutsOpen}
+        onOpenChange={setShortcutsOpen}
+      />
+
       {/* TODO: Uncomment when settings functionality is ready
-      <SettingsDialog 
+      <SettingsDialog
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         trigger={null}

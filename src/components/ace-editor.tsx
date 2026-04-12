@@ -16,8 +16,81 @@ import "ace-builds/src-noconflict/ext-linking";
 type EditorProps = {
   value: string;
   onChange: (value: string) => void;
-  theme?: string; // Allow theme switching
+  theme?: string;
 };
+
+// Wrap selection with prefix/suffix, or insert both with cursor placed inside
+function wrapOrInsert(editor: any, prefix: string, suffix: string) {
+  const selection = editor.getSelectedText();
+  if (selection) {
+    const range = editor.selection.getRange();
+    editor.session.replace(range, `${prefix}${selection}${suffix}`);
+  } else {
+    const cursor = editor.getCursorPosition();
+    editor.session.insert(cursor, `${prefix}${suffix}`);
+    editor.moveCursorTo(cursor.row, cursor.column + prefix.length);
+  }
+}
+
+const editorFormattingCommands = [
+  {
+    name: "bold",
+    bindKey: { win: "Ctrl-B", mac: "Command-B" },
+    exec: (editor: any) => wrapOrInsert(editor, "**", "**"),
+  },
+  {
+    name: "italic",
+    bindKey: { win: "Ctrl-I", mac: "Command-I" },
+    exec: (editor: any) => wrapOrInsert(editor, "*", "*"),
+  },
+  {
+    name: "link",
+    bindKey: { win: "Ctrl-K", mac: "Command-K" },
+    exec: (editor: any) => {
+      const selection = editor.getSelectedText();
+      const cursor = editor.getCursorPosition();
+      if (selection) {
+        const range = editor.selection.getRange();
+        editor.session.replace(range, `[${selection}](url)`);
+      } else {
+        editor.session.insert(cursor, "[text](url)");
+        // Place cursor on "text" so it can be replaced immediately
+        editor.moveCursorTo(cursor.row, cursor.column + 1);
+        editor.selection.selectTo(cursor.row, cursor.column + 5);
+      }
+    },
+  },
+  {
+    name: "heading",
+    bindKey: { win: "Ctrl-Shift-H", mac: "Command-Shift-H" },
+    exec: (editor: any) => {
+      const cursor = editor.getCursorPosition();
+      const line = editor.session.getLine(cursor.row);
+      const headingMatch = line.match(/^(#{1,6}) /);
+      if (!headingMatch) {
+        editor.session.insert({ row: cursor.row, column: 0 }, "# ");
+      } else if (headingMatch[1].length < 6) {
+        const oldLen = headingMatch[1].length;
+        editor.session.replace(
+          {
+            start: { row: cursor.row, column: 0 },
+            end: { row: cursor.row, column: oldLen },
+          },
+          headingMatch[1] + "#"
+        );
+      } else {
+        // Remove heading prefix (6 hashes + space = 7 chars)
+        editor.session.replace(
+          {
+            start: { row: cursor.row, column: 0 },
+            end: { row: cursor.row, column: 7 },
+          },
+          ""
+        );
+      }
+    },
+  },
+];
 
 export const MarkdownEditor = ({
   value,
@@ -47,6 +120,7 @@ export const MarkdownEditor = ({
         value={value}
         onChange={onChange}
         name="markdown-editor"
+        commands={editorFormattingCommands}
         editorProps={{
           $blockScrolling: Infinity,
           $useWorker: false,
