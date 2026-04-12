@@ -95,6 +95,64 @@ fn get_command_line_args() -> Vec<String> {
     std::env::args().collect()
 }
 
+#[derive(serde::Serialize, Clone)]
+struct ShortcutInfo {
+    keys: String,
+    description: String,
+    category: String,
+}
+
+#[tauri::command]
+fn get_keyboard_shortcuts() -> Vec<ShortcutInfo> {
+    vec![
+        ShortcutInfo {
+            keys: "Ctrl+S / Cmd+S".to_string(),
+            description: "Save current file".to_string(),
+            category: "File".to_string(),
+        },
+        ShortcutInfo {
+            keys: "Ctrl+N / Cmd+N".to_string(),
+            description: "Create new file".to_string(),
+            category: "File".to_string(),
+        },
+        ShortcutInfo {
+            keys: "Ctrl+Shift+N".to_string(),
+            description: "Create new folder".to_string(),
+            category: "File".to_string(),
+        },
+        ShortcutInfo {
+            keys: "Ctrl+P / Cmd+P".to_string(),
+            description: "Toggle preview".to_string(),
+            category: "View".to_string(),
+        },
+        ShortcutInfo {
+            keys: "Ctrl+B / Cmd+B".to_string(),
+            description: "Bold selected text".to_string(),
+            category: "Formatting".to_string(),
+        },
+        ShortcutInfo {
+            keys: "Ctrl+I / Cmd+I".to_string(),
+            description: "Italic selected text".to_string(),
+            category: "Formatting".to_string(),
+        },
+        ShortcutInfo {
+            keys: "Ctrl+K / Cmd+K".to_string(),
+            description: "Insert link".to_string(),
+            category: "Formatting".to_string(),
+        },
+        ShortcutInfo {
+            keys: "Ctrl+Shift+H".to_string(),
+            description: "Toggle heading (cycles H1 → H6 → off)".to_string(),
+            category: "Formatting".to_string(),
+        },
+        ShortcutInfo {
+            keys: "Ctrl+Shift+? / Ctrl+Shift+/".to_string(),
+            description: "Show keyboard shortcuts".to_string(),
+            category: "Help".to_string(),
+        },
+    ]
+}
+
 /// Handle file opening when app is opened with a file argument
 fn handle_file_open_request(app: &AppHandle, file_path: &str) {
     // Emit an event to the frontend with the file path to open
@@ -120,7 +178,8 @@ pub fn run() {
             create_file,
             create_folder,
             read_directory,
-            get_command_line_args
+            get_command_line_args,
+            get_keyboard_shortcuts
         ])
         .setup(|app| {
             // Check for command line arguments on startup
