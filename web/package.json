@@ -5,8 +5,13 @@
   "author": "Hussein Kizz",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
+    "build": "next build",
+    "build:clean": "rm -rf .next && next build",
+    "prestart": "node scripts/verify-build.cjs",
+    "start": "next start -H 0.0.0.0 -p ${PORT:-3009}",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:restart": "pm2 restart writter",
+    "pm2:stop": "pm2 stop writter",
     "lint": "eslint"
   },
   "dependencies": {

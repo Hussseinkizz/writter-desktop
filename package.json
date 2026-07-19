@@ -13,7 +13,12 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "start": "pnpm --dir web start",
+    "web:dev": "pnpm --dir web dev",
+    "web:build": "pnpm --dir web build",
+    "web:start": "pnpm --dir web start",
+    "web:pm2:start": "pnpm --dir web pm2:start"
   },
   "dependencies": {
     "@codemirror/lang-markdown": "^6.3.3",
