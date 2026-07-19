@@ -186,3 +186,36 @@ body {
 .banner-shimmer {
   animation: banner-shimmer 3s ease-in-out infinite;
 }
+
+@keyframes heartbeat-glow {
+  0%, 52%, 100% {
+    box-shadow:
+      0 0 6px rgba(244, 63, 94, 0.25),
+      0 0 14px rgba(244, 63, 94, 0.12);
+    transform: scale(1);
+  }
+  12% {
+    box-shadow:
+      0 0 14px rgba(251, 113, 133, 0.75),
+      0 0 28px rgba(244, 63, 94, 0.45),
+      0 0 42px rgba(225, 29, 72, 0.2);
+    transform: scale(1.045);
+  }
+  24% {
+    box-shadow:
+      0 0 8px rgba(244, 63, 94, 0.3),
+      0 0 16px rgba(244, 63, 94, 0.15);
+    transform: scale(1);
+  }
+  36% {
+    box-shadow:
+      0 0 12px rgba(251, 113, 133, 0.55),
+      0 0 24px rgba(244, 63, 94, 0.3);
+    transform: scale(1.025);
+  }
+}
+
+.coming-soon-badge {
+  animation: heartbeat-glow 2.8s ease-in-out infinite;
+  will-change: box-shadow, transform;
+}

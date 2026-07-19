@@ -24,8 +24,8 @@ export function AnnouncementBanner() {
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center justify-center gap-2.5 px-4 py-2.5 sm:flex-row sm:gap-5 sm:py-2">
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-400">
-            <FiZap className="size-3 text-amber-300" aria-hidden="true" />
+          <span className="coming-soon-badge inline-flex shrink-0 items-center gap-1 rounded-full border border-rose-500/45 bg-rose-950/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-rose-300">
+            <FiZap className="size-3 text-rose-400" aria-hidden="true" />
             Coming soon
           </span>
           <p className="text-center text-sm text-zinc-300 sm:text-left">
