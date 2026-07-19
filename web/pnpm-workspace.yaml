@@ -1,3 +1,17 @@
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - postcss@8.5.20
 onlyBuiltDependencies:
   - sharp
   - unrs-resolver
+overrides:
+  postcss: 8.5.20
+  minimatch: 3.1.4
+  flatted: 3.4.2
+  picomatch@2: 2.3.2
+  picomatch@4: 4.0.4
+  ajv: 6.14.0
+  brace-expansion: 1.1.13
+  js-yaml@4: 4.3.0

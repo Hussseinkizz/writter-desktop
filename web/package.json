@@ -10,13 +10,13 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@next/third-parties": "^15.5.3",
+    "@next/third-parties": "^16.2.10",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.544.0",
-    "next": "16.1.6",
+    "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-icons": "^5.5.0",
@@ -30,7 +30,7 @@
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9",
-    "eslint-config-next": "15.5.3",
+    "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.8",
     "typescript": "^5"
