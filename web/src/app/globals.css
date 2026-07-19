@@ -173,3 +173,16 @@ body {
 .pulsing-glow {
   animation: subtle-glow-pulse 4s ease-in-out infinite;
 }
+
+@keyframes banner-shimmer {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.banner-shimmer {
+  animation: banner-shimmer 3s ease-in-out infinite;
+}

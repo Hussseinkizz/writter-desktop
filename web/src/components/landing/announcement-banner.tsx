@@ -1,0 +1,56 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { FiArrowUpRight, FiZap } from 'react-icons/fi';
+
+const ISSUES_URL =
+  'https://github.com/Hussseinkizz/writter-desktop/issues';
+
+export function AnnouncementBanner() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: 'easeOut' }}
+      className="relative z-50 w-full overflow-hidden border-b border-amber-500/20 bg-zinc-900">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-amber-950/30 via-amber-900/20 to-amber-950/30"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent banner-shimmer"
+      />
+
+      <div className="relative mx-auto flex max-w-5xl flex-col items-center justify-center gap-2.5 px-4 py-2.5 sm:flex-row sm:gap-5 sm:py-2">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-400">
+            <FiZap className="size-3 text-amber-300" aria-hidden="true" />
+            Coming soon
+          </span>
+          <p className="text-center text-sm text-zinc-300 sm:text-left">
+            <span className="bg-gradient-to-r from-amber-200 via-yellow-200 to-amber-400 bg-clip-text font-semibold text-transparent">
+              Writter v2
+            </span>{' '}
+            launches{' '}
+            <span className="font-medium text-amber-300/95">
+              August 30, 2026
+            </span>
+          </p>
+        </div>
+
+        <a
+          href={ISSUES_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-500/35 bg-amber-500/10 px-3.5 py-1 text-xs font-medium text-amber-100/90 transition-all hover:border-amber-400/55 hover:bg-amber-500/18 hover:text-amber-50 hover:shadow-[0_0_22px_rgba(251,191,36,0.14)] active:scale-[0.98]">
+          Feature request?
+          <FiArrowUpRight
+            className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            aria-hidden="true"
+          />
+        </a>
+      </div>
+    </motion.div>
+  );
+}

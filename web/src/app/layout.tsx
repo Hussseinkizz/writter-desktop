@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { AnnouncementBanner } from '@/components/landing/announcement-banner';
 
 export const metadata: Metadata = {
   title: 'Writter - Minimalistic Markdown Editor',
@@ -75,6 +76,7 @@ export default function RootLayout({
       <body
         className="antialiased bg-zinc-900 text-white"
         suppressHydrationWarning>
+        <AnnouncementBanner />
         {children}
       </body>
     </html>
