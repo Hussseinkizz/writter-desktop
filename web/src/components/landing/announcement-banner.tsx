@@ -24,7 +24,7 @@ export function AnnouncementBanner() {
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center justify-center gap-2.5 px-4 py-2.5 sm:flex-row sm:gap-5 sm:py-2">
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
-          <span className="coming-soon-badge inline-flex shrink-0 items-center gap-1 rounded-full border border-rose-500/45 bg-rose-950/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-rose-300">
+          <span className="coming-soon-badge inline-flex shrink-0 items-center gap-1 rounded-md border border-rose-500/40 border-l-2 border-l-rose-400 bg-rose-950/40 px-2 py-0.5 pl-1.5 text-[10px] font-semibold uppercase tracking-widest text-rose-300">
             <FiZap className="size-3 text-rose-400" aria-hidden="true" />
             Coming soon
           </span>
@@ -43,10 +43,10 @@ export function AnnouncementBanner() {
           href={ISSUES_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-500/35 bg-amber-500/10 px-3.5 py-1 text-xs font-medium text-amber-100/90 transition-all hover:border-amber-400/55 hover:bg-amber-500/18 hover:text-amber-50 hover:shadow-[0_0_22px_rgba(251,191,36,0.14)] active:scale-[0.98]">
+          className="group inline-flex shrink-0 items-center gap-1.5 rounded-md border border-amber-500/40 bg-zinc-900/70 px-3 py-1.5 text-sm font-medium text-amber-100/90 transition-all hover:border-amber-400/55 hover:bg-amber-500/12 hover:text-amber-50 active:scale-[0.98]">
           Feature request?
           <FiArrowUpRight
-            className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             aria-hidden="true"
           />
         </a>
