@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FiArrowUpRight, FiZap } from 'react-icons/fi';
+import { FiArrowUpRight } from 'react-icons/fi';
 
 const ISSUES_URL =
   'https://github.com/Hussseinkizz/writter-desktop/issues';
@@ -23,21 +23,15 @@ export function AnnouncementBanner() {
       />
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center justify-center gap-2.5 px-4 py-2.5 sm:flex-row sm:gap-5 sm:py-2">
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
-          <span className="coming-soon-badge inline-flex shrink-0 items-center gap-1 rounded-md border border-rose-500/40 border-l-2 border-l-rose-400 bg-rose-950/40 px-2 py-0.5 pl-1.5 text-[10px] font-semibold uppercase tracking-widest text-rose-300">
-            <FiZap className="size-3 text-rose-400" aria-hidden="true" />
-            Coming soon
+        <p className="text-center text-sm text-zinc-300 sm:text-left">
+          <span className="bg-gradient-to-r from-amber-200 via-yellow-200 to-amber-400 bg-clip-text font-semibold text-transparent">
+            Writter v2
+          </span>{' '}
+          launches{' '}
+          <span className="font-medium text-amber-300/95">
+            August 30, 2026
           </span>
-          <p className="text-center text-sm text-zinc-300 sm:text-left">
-            <span className="bg-gradient-to-r from-amber-200 via-yellow-200 to-amber-400 bg-clip-text font-semibold text-transparent">
-              Writter v2
-            </span>{' '}
-            launches{' '}
-            <span className="font-medium text-amber-300/95">
-              August 30, 2026
-            </span>
-          </p>
-        </div>
+        </p>
 
         <a
           href={ISSUES_URL}
